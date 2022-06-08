@@ -6,11 +6,15 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.*;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
@@ -56,9 +60,6 @@ public class OrganizerController implements Initializable {
     public Button deleteButton;
 
     @FXML
-    public Button backgroundButton;
-
-    @FXML
     public Button saveButton;
 
     @FXML
@@ -66,6 +67,9 @@ public class OrganizerController implements Initializable {
 
     @FXML
     public HBox backgroundHBox;
+
+    @FXML
+    public MenuButton backgroundMenuButton;
 
 
     // -------------------------> private fields
@@ -76,6 +80,13 @@ public class OrganizerController implements Initializable {
     // ========================================================================================
     // Methods
     // ========================================================================================
+
+    // -------------------------> Override methods
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        loadCategories();
+        loadBackgrounds();
+    }
 
     // -------------------------> FXML methods
 
@@ -114,9 +125,47 @@ public class OrganizerController implements Initializable {
 
     // -------------------------> internal methods
 
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        loadCategories();
+    private String[] findBackgroundsInDirectory(String path) {
+        var file = new File(path);
+        return file.list();
+    }
+
+    private void loadBackgrounds() {
+        try {
+            // get all backgrounds from background folder
+           var pathToBGFolder = "src/main/resources/backgrounds/";
+           var backgrounds = findBackgroundsInDirectory(pathToBGFolder);
+
+           // add newly-found backgrounds to the menu button
+            for (var image : backgrounds) {
+
+                var item = new MenuItem(image);
+                item.setOnAction(event -> setBackground(pathToBGFolder, image));
+                backgroundMenuButton.getItems().add(item);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void setBackground(String pathToBGFolder, String image) {
+        try {
+            var bg = createBackground(new Image(new FileInputStream(pathToBGFolder + image)));
+            backgroundHBox.setBackground(bg);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Background createBackground(Image image) {
+        var size = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true);
+
+        return new Background(new BackgroundImage(image,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                size));
     }
 
     private void loadCategories() {
