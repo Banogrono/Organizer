@@ -4,6 +4,7 @@ import com.omicron.organizerb.model.Task;
 import com.omicron.organizerb.model.TaskList;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -123,7 +124,49 @@ public class OrganizerController implements Initializable {
         saveTaskDescriptionFromTextArea();
     }
 
+    @FXML
+    public void setReminderForTask(MouseEvent mouseEvent) {
+    }
+
+    @FXML
+    public void addTaskDueDate(MouseEvent mouseEvent) {
+        try {
+            // load dialog box FXML
+           var loader = getDialogFXMLLoader("src/main/resources/fxml/pickDateDialog.fxml");
+           DialogPane pickDateDialog = loader.load();
+
+           //var controller = loader.getController();
+            // open new dialog
+            var dialog = new Dialog<ButtonType>();
+            dialog.setDialogPane(pickDateDialog);
+            dialog.setTitle("Pick a date");
+
+            // get data from dialog box
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
+
+    @FXML
+    public void repeatTask(MouseEvent mouseEvent) {
+    }
+
+    @FXML
+    public void deleteTask(MouseEvent mouseEvent) {
+    }
+
     // -------------------------> internal methods
+
+    private FXMLLoader getDialogFXMLLoader(String path) {
+        try {
+            var dialogFXML = new File(path).toURI().toURL();
+            return new FXMLLoader(dialogFXML);
+        }catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private String[] findBackgroundsInDirectory(String path) {
         var file = new File(path);
@@ -276,5 +319,6 @@ public class OrganizerController implements Initializable {
         categories.add(taskList3);
 
     }
+
 
 }

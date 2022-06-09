@@ -8,7 +8,6 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
@@ -19,11 +18,6 @@
    <children>
       <VBox prefHeight="600.0" prefWidth="602.0">
          <children>
-            <AnchorPane prefHeight="48.0" prefWidth="230.0">
-               <VBox.margin>
-                  <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
-               </VBox.margin>
-            </AnchorPane>
             <Label prefHeight="18.0" prefWidth="250.0" text="Categories">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
@@ -57,11 +51,16 @@
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
             </Label>
-            <ListView fx:id="activeTasksListView" onMouseReleased="#loadTaskDetails" prefHeight="512.0" prefWidth="463.0">
+            <ListView fx:id="activeTasksListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseReleased="#loadTaskDetails" prefHeight="512.0" prefWidth="463.0">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
             </ListView>
+            <Label text="Completed tasks">
+               <VBox.margin>
+                  <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+               </VBox.margin>
+            </Label>
             <ListView fx:id="completedTasksListView" prefHeight="317.0" prefWidth="463.0">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
@@ -76,7 +75,7 @@
       </VBox>
       <VBox prefHeight="600.0" prefWidth="563.0">
          <children>
-            <Label fx:id="taskTitleLabel" prefHeight="21.0" prefWidth="191.0" text="task  title...">
+            <Label fx:id="taskTitleLabel" prefHeight="21.0" text="task  title...">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
@@ -88,22 +87,22 @@
             </TextArea>
             <VBox prefHeight="235.0" prefWidth="199.0">
                <children>
-                  <Button fx:id="remindMeButton" mnemonicParsing="false" prefHeight="30.0" prefWidth="335.0" text="Remind me">
+                  <Button fx:id="remindMeButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseReleased="#setReminderForTask" prefHeight="30.0" prefWidth="335.0" text="Remind me">
                      <VBox.margin>
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>
                   </Button>
-                  <Button fx:id="addDueDateButton" mnemonicParsing="false" prefHeight="30.0" prefWidth="263.0" text="Add due date">
+                  <Button fx:id="addDueDateButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseReleased="#addTaskDueDate" prefHeight="30.0" prefWidth="218.0" text="Add due date">
                      <VBox.margin>
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>
                   </Button>
-                  <Button fx:id="repeatButton" mnemonicParsing="false" prefHeight="30.0" prefWidth="383.0" text="Repeat">
+                  <Button fx:id="repeatButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseReleased="#repeatTask" prefHeight="30.0" prefWidth="383.0" text="Repeat">
                      <VBox.margin>
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>
                   </Button>
-                  <Button fx:id="deleteButton" mnemonicParsing="false" prefHeight="30.0" prefWidth="327.0" text="Delete">
+                  <Button fx:id="deleteButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseReleased="#deleteTask" prefHeight="30.0" text="Delete">
                      <VBox.margin>
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>
@@ -113,12 +112,12 @@
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>
                   </Separator>
-                  <Button fx:id="saveButton" mnemonicParsing="false" prefHeight="30.0" prefWidth="208.0" text="Save">
+                  <Button fx:id="saveButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="30.0" prefWidth="208.0" text="Save">
                      <VBox.margin>
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>
                   </Button>
-                  <MenuButton fx:id="backgroundMenuButton" mnemonicParsing="false" prefHeight="26.0" prefWidth="210.0" text="Background">
+                  <MenuButton fx:id="backgroundMenuButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="26.0" prefWidth="210.0" text="Background">
                      <VBox.margin>
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>
@@ -128,4 +127,7 @@
          </children>
       </VBox>
    </children>
+   <padding>
+      <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+   </padding>
 </HBox>
