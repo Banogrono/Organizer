@@ -3,6 +3,7 @@ package com.omicron.organizerb.controller;
 import com.omicron.organizerb.model.Task;
 import com.omicron.organizerb.model.TaskList;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -17,6 +18,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.net.URL;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
@@ -52,7 +54,7 @@ public class OrganizerController implements Initializable {
     public Button remindMeButton;
 
     @FXML
-    public Button addDueDateButton;
+    public DatePicker addDueDatePicker;
 
     @FXML
     public Button repeatButton;
@@ -129,33 +131,22 @@ public class OrganizerController implements Initializable {
     }
 
     @FXML
-    public void addTaskDueDate(MouseEvent mouseEvent) {
-        try {
-            // load dialog box FXML
-           var loader = getDialogFXMLLoader("src/main/resources/fxml/pickDateDialog.fxml");
-           DialogPane pickDateDialog = loader.load();
-
-           //var controller = loader.getController();
-            // open new dialog
-            var dialog = new Dialog<ButtonType>();
-            dialog.setDialogPane(pickDateDialog);
-            dialog.setTitle("Pick a date");
-
-            // get data from dialog box
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-
+    public void addTaskDueDate(ActionEvent mouseEvent) {
+        setTaskDeadLine(addDueDatePicker.getValue());
     }
 
     @FXML
     public void repeatTask(MouseEvent mouseEvent) {
+
+
     }
 
     @FXML
     public void deleteTask(MouseEvent mouseEvent) {
+        deleteSelectedTask();
     }
+
+
 
     // -------------------------> internal methods
 
@@ -166,6 +157,18 @@ public class OrganizerController implements Initializable {
         }catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void deleteSelectedTask() {
+        if (getSelectedTask() == null) return;
+        getSelectedCategoryItem().getTasks().remove(getSelectedTask());
+        refreshTaskList();
+    }
+
+    private void setTaskDeadLine(LocalDate date) {
+        if (getSelectedTask() == null) return;
+
+        getSelectedTask().setDate(date);
     }
 
     private String[] findBackgroundsInDirectory(String path) {
@@ -214,13 +217,14 @@ public class OrganizerController implements Initializable {
     private void loadCategories() {
         categories = new ArrayList<>();
         createAndLoadSampleData();
-
         refreshCategories();
     }
 
     private void saveTaskDescriptionFromTextArea() {
         String content = taskDescriptionTextArea.getText();
         if (content == null || content.isBlank()) return;
+
+        if (getSelectedTask() == null) return;
 
         getSelectedTask().setDescription(content);
         refreshTaskDetails();
@@ -240,8 +244,14 @@ public class OrganizerController implements Initializable {
     }
 
     private void refreshTaskDetails () {
+        if (getSelectedTask() == null) return;
         setContentOfTaskDetails();
         setContentOfTaskTitleLabel();
+        setContentOfDatePicker();
+    }
+
+    private void setContentOfDatePicker(){
+        addDueDatePicker.setValue(getSelectedTask().getDate());
     }
 
     private void setContentOfCategoryLabel() {
@@ -250,16 +260,19 @@ public class OrganizerController implements Initializable {
 
     private void setContentOfTaskTitleLabel() {
         var task = getSelectedTask();
-        if (task == null) return;
 
         var title = task.getTitle() == null ? "" : task.getTitle();
         taskTitleLabel.setText(title);
     }
 
     private void setContentOfTaskDetails() {
-        if (getSelectedTask() == null) return;
+
         var description = getSelectedTask().getDescription();
-        if (description == null || description.isBlank()) return;
+
+        if (description == null || description.isBlank()) {
+            taskDescriptionTextArea.setText("");
+            return;
+        }
 
         taskDescriptionTextArea.setText(description);
     }

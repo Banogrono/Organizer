@@ -8,6 +8,7 @@
 
 package com.omicron.organizerb.model;
 
+import javafx.beans.property.StringProperty;
 import lombok.Data;
 
 import java.time.LocalDate;
