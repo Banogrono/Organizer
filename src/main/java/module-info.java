@@ -1,6 +1,7 @@
 module com.omicron.organizerb {
     requires javafx.controls;
     requires javafx.fxml;
+    requires javafx.media;
     requires static lombok;
 
     opens com.omicron.organizerb to javafx.fxml;

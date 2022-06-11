@@ -42,6 +42,9 @@
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
+               <children>
+                  <MenuButton fx:id="backgroundMenuButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="26.0" prefWidth="210.0" text="Background" GridPane.rowIndex="2" />
+               </children>
             </GridPane>
          </children>
       </VBox>
@@ -59,7 +62,7 @@
             </ListView>
             <Label text="Completed tasks">
                <VBox.margin>
-                  <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                  <Insets />
                </VBox.margin>
             </Label>
             <ListView fx:id="completedTasksListView" prefHeight="317.0" prefWidth="463.0">
@@ -86,19 +89,39 @@
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
             </TextArea>
+            <Separator prefWidth="200.0">
+               <VBox.margin>
+                  <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+               </VBox.margin>
+            </Separator>
             <VBox prefHeight="235.0" prefWidth="199.0">
                <children>
-                  <Button fx:id="remindMeButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseReleased="#setReminderForTask" prefHeight="30.0" prefWidth="335.0" text="Remind me">
+                  <MenuButton fx:id="remindMeMenuButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Remind me">
                      <VBox.margin>
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>
-                  </Button>
+                  </MenuButton>
+                  <MenuButton fx:id="repeatMenuButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#repeatTask" text="Repeat">
+                     <VBox.margin>
+                        <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                     </VBox.margin>
+                  </MenuButton>
                   <DatePicker fx:id="addDueDatePicker" maxWidth="1.7976931348623157E308" onAction="#addTaskDueDate" promptText="Add due date">
                      <VBox.margin>
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>
                   </DatePicker>
-                  <Button fx:id="repeatButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseReleased="#repeatTask" prefHeight="30.0" prefWidth="383.0" text="Repeat">
+                  <Separator maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+                     <VBox.margin>
+                        <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                     </VBox.margin>
+                  </Separator>
+                  <Button fx:id="markAsDoneButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#markTaskAsDone" text="Mark as Done">
+                     <VBox.margin>
+                        <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                     </VBox.margin>
+                  </Button>
+                  <Button fx:id="saveButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="30.0" prefWidth="208.0" text="Save">
                      <VBox.margin>
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>
@@ -108,21 +131,6 @@
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>
                   </Button>
-                  <Separator prefHeight="4.0" prefWidth="199.0">
-                     <VBox.margin>
-                        <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
-                     </VBox.margin>
-                  </Separator>
-                  <Button fx:id="saveButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="30.0" prefWidth="208.0" text="Save">
-                     <VBox.margin>
-                        <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
-                     </VBox.margin>
-                  </Button>
-                  <MenuButton fx:id="backgroundMenuButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="26.0" prefWidth="210.0" text="Background">
-                     <VBox.margin>
-                        <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
-                     </VBox.margin>
-                  </MenuButton>
                </children>
             </VBox>
          </children>

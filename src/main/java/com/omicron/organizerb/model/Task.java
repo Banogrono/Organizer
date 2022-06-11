@@ -8,7 +8,6 @@
 
 package com.omicron.organizerb.model;
 
-import javafx.beans.property.StringProperty;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -28,13 +27,13 @@ public class Task {
 
     private List<Task> subTasks;
 
-    private boolean repeat;
+    private RepeatTask repetition = RepeatTask.NONE;
 
-    private LocalDate date;
+    private LocalDate date = LocalDate.now();
 
-    private LocalTime time;
+    private LocalTime time = LocalTime.now();
 
-    private TaskPriority priority;
+    private TaskPriority priority = TaskPriority.NORMAL;
 
     private List<String> tags;
 
@@ -42,11 +41,12 @@ public class Task {
     // Constructors
     // ========================================================================================
 
-    public Task(String title, String description, List<Task> subTasks, boolean repeat, LocalDate date, LocalTime time, TaskPriority priority, List<String> tags) {
+
+    public Task(String title, String description, List<Task> subTasks, RepeatTask repetition, LocalDate date, LocalTime time, TaskPriority priority, List<String> tags) {
         this.title = title;
         this.description = description;
         this.subTasks = subTasks;
-        this.repeat = repeat;
+        this.repetition = repetition;
         this.date = date;
         this.time = time;
         this.priority = priority;
@@ -81,7 +81,7 @@ public class Task {
                 "title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", subTasks=" + subTasks +
-                ", repeat=" + repeat +
+                ", repeat=" + repetition +
                 ", date=" + date +
                 ", time=" + time +
                 ", priority=" + priority +

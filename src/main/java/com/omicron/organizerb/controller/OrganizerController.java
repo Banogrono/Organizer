@@ -1,5 +1,6 @@
 package com.omicron.organizerb.controller;
 
+import com.omicron.organizerb.model.RepeatTask;
 import com.omicron.organizerb.model.Task;
 import com.omicron.organizerb.model.TaskList;
 import javafx.collections.FXCollections;
@@ -13,14 +14,18 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.ResourceBundle;
+import java.time.ZoneId;
+import java.util.*;
 
 public class OrganizerController implements Initializable {
 
@@ -51,13 +56,13 @@ public class OrganizerController implements Initializable {
     public TextArea taskDescriptionTextArea;
 
     @FXML
-    public Button remindMeButton;
+    public MenuButton remindMeMenuButton;
 
     @FXML
     public DatePicker addDueDatePicker;
 
     @FXML
-    public Button repeatButton;
+    public MenuButton repeatMenuButton;
 
     @FXML
     public Button deleteButton;
@@ -74,6 +79,9 @@ public class OrganizerController implements Initializable {
     @FXML
     public MenuButton backgroundMenuButton;
 
+    @FXML
+    public Button markAsDoneButton;
+
 
     // -------------------------> private fields
 
@@ -89,6 +97,8 @@ public class OrganizerController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         loadCategories();
         loadBackgrounds();
+        createAndAddItemsForRepeatMenuButton();
+        setActionsForRemindMeMenuButton();
     }
 
     // -------------------------> FXML methods
@@ -136,8 +146,7 @@ public class OrganizerController implements Initializable {
     }
 
     @FXML
-    public void repeatTask(MouseEvent mouseEvent) {
-
+    public void repeatTask(ActionEvent event) {
 
     }
 
@@ -146,9 +155,64 @@ public class OrganizerController implements Initializable {
         deleteSelectedTask();
     }
 
+    @FXML
+    public void markTaskAsDone(ActionEvent event) {
+        var task = getSelectedTask();
+        if (task == null) return;
+
+        playDoneJingle();
+        getSelectedCategoryItem().getTasks().remove(task);
+        refreshTaskList();
+        completedTasksListView.getItems().add(task);
+    }
+
 
 
     // -------------------------> internal methods
+
+    private void createAndAddItemsForRepeatMenuButton() {
+        var repeatDaily = new MenuItem("Daily");
+        repeatDaily.setOnAction(e -> setTaskRepetition(getSelectedTask(), RepeatTask.DAILY));
+
+        var repeatWeekly = new MenuItem("Weekly");
+        repeatDaily.setOnAction(e -> setTaskRepetition(getSelectedTask(), RepeatTask.WEEKLY));
+
+        var repeatMonthly = new MenuItem("Monthly");
+        repeatDaily.setOnAction(e -> setTaskRepetition(getSelectedTask(), RepeatTask.MONTHLY));
+
+        var repeatYearly = new MenuItem("Yearly");
+        repeatDaily.setOnAction(e -> setTaskRepetition(getSelectedTask(), RepeatTask.YEARLY));
+
+        var doNotRepeat = new MenuItem("Do not repeat");
+        repeatDaily.setOnAction(e -> setTaskRepetition(getSelectedTask(), RepeatTask.NONE));
+
+
+        repeatMenuButton.getItems().addAll(doNotRepeat, repeatDaily, repeatWeekly, repeatMonthly, repeatYearly);
+    }
+
+    private void setTaskRepetition(Task task, RepeatTask repetition) {
+        if (task == null) return;
+
+        task.setRepetition(repetition);
+    }
+
+    private void setActionsForRemindMeMenuButton() {
+
+        var remindMeLaterToday = new MenuItem("Later today");
+        var remindMeTomorrow = new MenuItem("Tomorrow");
+        var remindMeNextWeek = new MenuItem("Next Week");
+        var remindMeCustomTime = new MenuItem("Custom");
+
+
+        // todo: see if that even works
+        remindMeLaterToday.setOnAction(e -> setReminder(7200000)); // 2 hours
+        remindMeTomorrow.setOnAction(e -> setReminder(LocalDate.now().plusDays(1))); // 1 day
+        remindMeNextWeek.setOnAction(e -> setReminder(LocalDate.now().plusDays(7))); // 1 week
+
+
+        remindMeMenuButton.getItems().addAll(remindMeLaterToday, remindMeTomorrow, remindMeNextWeek, remindMeCustomTime);
+
+    }
 
     private FXMLLoader getDialogFXMLLoader(String path) {
         try {
@@ -159,10 +223,66 @@ public class OrganizerController implements Initializable {
         }
     }
 
+    // todo: refactor this code
+    private void setReminder(long delay) {
+
+        Timer timer = new Timer();
+        TimerTask job = new TimerTask() {
+            @Override
+            public void run() {
+                // play remind jingle
+                playReminderJingle();
+                // todo: set off alert box with task info
+
+            }
+        };
+        timer.schedule(job, delay);
+    }
+
+    private void setReminder(LocalDate date) {
+
+        Timer timer = new Timer();
+        TimerTask job = new TimerTask() {
+            @Override
+            public void run() {
+                // play remind jingle
+                playReminderJingle();
+                // todo: set off alert box with task info
+
+            }
+        };
+
+        timer.schedule(job, Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+    }
+
     private void deleteSelectedTask() {
         if (getSelectedTask() == null) return;
         getSelectedCategoryItem().getTasks().remove(getSelectedTask());
         refreshTaskList();
+    }
+
+    private void playReminderJingle() {
+       try {
+           var soundFile = new File("src/main/resources/jingels/alarm.mp3");
+           playSound(soundFile);
+       } catch (Exception e) {
+           throw new RuntimeException(e);
+       }
+    }
+
+    private void playDoneJingle() {
+        try {
+            var soundFile = new File("src/main/resources/jingels/done.mp3");
+            playSound(soundFile);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void playSound(File soundFile) throws MalformedURLException {
+        Media sound = new Media(soundFile.toURI().toURL().toString());
+        MediaPlayer mediaPlayer = new MediaPlayer(sound);
+        mediaPlayer.play();
     }
 
     private void setTaskDeadLine(LocalDate date) {
@@ -332,6 +452,7 @@ public class OrganizerController implements Initializable {
         categories.add(taskList3);
 
     }
+
 
 
 }
