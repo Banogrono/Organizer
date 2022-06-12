@@ -3,6 +3,7 @@ package com.omicron.organizerb.controller;
 import com.omicron.organizerb.model.RepeatTask;
 import com.omicron.organizerb.model.Task;
 import com.omicron.organizerb.model.TaskList;
+import com.omicron.organizerb.model.TaskPriority;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -22,7 +23,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
@@ -82,6 +82,15 @@ public class OrganizerController implements Initializable {
     @FXML
     public Button markAsDoneButton;
 
+    @FXML
+    public ContextMenu taskListContextMenu;
+
+    @FXML
+    public ContextMenu categoryContextMenu;
+
+    @FXML
+    public TextField addCategoryTextField;
+
 
     // -------------------------> private fields
 
@@ -96,9 +105,11 @@ public class OrganizerController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         loadCategories();
-        loadBackgrounds();
+        initializeCategoryContextMenu();
+        initializeTaskListContextMenu();
         createAndAddItemsForRepeatMenuButton();
         setActionsForRemindMeMenuButton();
+        loadBackgroundsFromDirectory();
     }
 
     // -------------------------> FXML methods
@@ -127,6 +138,24 @@ public class OrganizerController implements Initializable {
     }
 
     @FXML
+    public void addCategory(KeyEvent event) {
+        if (event.getCode() == KeyCode.ENTER) {
+            if (!(addCategoryTextField.getText() == null || addCategoryTextField.getText().isBlank())) {
+
+                // create new task
+                var taskList = new TaskList();
+                taskList.setTaskListTitle(addCategoryTextField.getText());
+
+                categories.add(taskList);
+
+                refreshCategories();
+
+                addCategoryTextField.setText("");
+            }
+        }
+    }
+
+    @FXML
     public void loadTaskDetails(MouseEvent mouseEvent) {
         refreshTaskDetails();
     }
@@ -138,6 +167,7 @@ public class OrganizerController implements Initializable {
 
     @FXML
     public void setReminderForTask(MouseEvent mouseEvent) {
+        // todo implement this
     }
 
     @FXML
@@ -147,12 +177,20 @@ public class OrganizerController implements Initializable {
 
     @FXML
     public void repeatTask(ActionEvent event) {
-
+        // todo implement this
     }
 
     @FXML
     public void deleteTask(MouseEvent mouseEvent) {
-        deleteSelectedTask();
+        // todo refactor
+        if (getSelectedTask() != null) {
+            deleteSelectedTask();
+            return;
+        }
+
+        if (getSelectedTaskFromCompletedTasksList() != null) {
+            deleteSelectedTaskFromCompletedTasks();
+        }
     }
 
     @FXML
@@ -167,8 +205,70 @@ public class OrganizerController implements Initializable {
     }
 
 
-
     // -------------------------> internal methods
+    private void initializeTaskListContextMenu() {
+
+        // todo: refactor
+
+        var markTaskAsDone = new MenuItem("Done");
+        markTaskAsDone.setOnAction(event -> {
+            markTaskAsDone(null);
+        });
+
+
+        var moveTask = new Menu("Move task to...");
+        for (int i = 0; i < categoriesListView.getItems().size(); i++) {
+            var category = (TaskList) categoriesListView.getItems().get(i);
+
+            var menuItem = new MenuItem(category.getTaskListTitle());
+
+            menuItem.setOnAction(e -> {
+                var task = getSelectedTask();
+                if (task == null) return;
+
+                getSelectedCategoryItem().getTasks().remove(task);
+                category.addTask(task);
+                refreshTaskList();
+
+            });
+            moveTask.getItems().add(menuItem);
+        }
+
+        var deleteTask = new MenuItem("Delete task");
+        deleteTask.setOnAction(event -> {
+            deleteTask(null);
+        });
+
+
+        var setTaskPriority = new Menu("Set priority...");
+        for (var priority : TaskPriority.values()) {
+            var priorityItem = new MenuItem(priority.name());
+            priorityItem.setOnAction(e -> setTaskPriority(priority));
+            setTaskPriority.getItems().add(priorityItem);
+        }
+
+
+        taskListContextMenu.getItems().addAll(markTaskAsDone, moveTask, deleteTask, setTaskPriority);
+    }
+
+    private void initializeCategoryContextMenu() {
+
+        var deleteCategory = new MenuItem("Delete category");
+        deleteCategory.setOnAction(event -> {
+            if (getSelectedCategoryItem() == null) return;
+            categories.remove(getSelectedCategoryItem());
+            categoriesListView.getItems().remove(getSelectedCategoryItem());
+        });
+
+        categoryContextMenu.getItems().add(deleteCategory);
+    }
+
+    private void setTaskPriority(TaskPriority priority) {
+        var task = getSelectedTask();
+        if (task == null) return;
+        task.setPriority(priority);
+        // todo: add some kind of colors to distinguish between tasks with different priorities
+    }
 
     private void createAndAddItemsForRepeatMenuButton() {
         var repeatDaily = new MenuItem("Daily");
@@ -261,6 +361,12 @@ public class OrganizerController implements Initializable {
         refreshTaskList();
     }
 
+    private void deleteSelectedTaskFromCompletedTasks() {
+        if (getSelectedTaskFromCompletedTasksList() == null) return;
+        completedTasksListView.getItems().remove(getSelectedTaskFromCompletedTasksList());
+        completedTasksListView.refresh();
+    }
+
     private void playReminderJingle() {
        try {
            var soundFile = new File("src/main/resources/jingels/alarm.mp3");
@@ -296,7 +402,7 @@ public class OrganizerController implements Initializable {
         return file.list();
     }
 
-    private void loadBackgrounds() {
+    private void loadBackgroundsFromDirectory() {
         try {
             // get all backgrounds from background folder
            var pathToBGFolder = "src/main/resources/backgrounds/";
@@ -317,14 +423,14 @@ public class OrganizerController implements Initializable {
 
     private void setBackground(String pathToBGFolder, String image) {
         try {
-            var bg = createBackground(new Image(new FileInputStream(pathToBGFolder + image)));
+            var bg = createBackgroundForHBox(new Image(new FileInputStream(pathToBGFolder + image)));
             backgroundHBox.setBackground(bg);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private Background createBackground(Image image) {
+    private Background createBackgroundForHBox(Image image) {
         var size = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true);
 
         return new Background(new BackgroundImage(image,
@@ -411,6 +517,10 @@ public class OrganizerController implements Initializable {
 
     private Task getSelectedTask () {
         return (Task) activeTasksListView.getSelectionModel().getSelectedItem();
+    }
+
+    private Task getSelectedTaskFromCompletedTasksList () {
+        return (Task) completedTasksListView.getSelectionModel().getSelectedItem();
     }
 
     private void clearAddTaskTextFiled() {
