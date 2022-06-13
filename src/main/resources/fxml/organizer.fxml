@@ -25,7 +25,7 @@
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
             </Label>
-            <ListView fx:id="categoriesListView" onMouseReleased="#loadTasks" prefHeight="559.0" prefWidth="233.0">
+            <ListView fx:id="categoriesListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseReleased="#loadTasks">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
@@ -47,8 +47,8 @@
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
                <children>
-                  <MenuButton fx:id="backgroundMenuButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="26.0" prefWidth="210.0" text="Background" GridPane.rowIndex="2" />
-                  <TextField fx:id="addCategoryTextField" onKeyReleased="#addCategory" promptText="Add category..." />
+                  <MenuButton fx:id="backgroundMenuButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Background" GridPane.rowIndex="2" />
+                  <TextField fx:id="addCategoryTextField" maxWidth="1.7976931348623157E308" onKeyReleased="#addCategory" promptText="Add category..." />
                </children>
             </GridPane>
          </children>
@@ -60,7 +60,7 @@
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
             </Label>
-            <ListView fx:id="activeTasksListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseReleased="#loadTaskDetails" prefHeight="512.0" prefWidth="463.0">
+            <ListView fx:id="activeTasksListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseReleased="#loadTaskDetails">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
@@ -73,7 +73,7 @@
                   <Insets left="4.0" />
                </VBox.margin>
             </Label>
-            <ListView fx:id="completedTasksListView" prefHeight="317.0" prefWidth="463.0">
+            <ListView fx:id="completedTasksListView" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" prefHeight="300.0">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
@@ -92,9 +92,9 @@
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
             </Label>
-            <TextArea fx:id="taskDescriptionTextArea" onMouseExited="#saveTaskDescription" prefHeight="330.0" prefWidth="191.0" promptText="Task description">
+            <TextArea fx:id="taskDescriptionTextArea" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseExited="#saveTaskDescription" prefHeight="300.0" prefWidth="219.0" promptText="Task description">
                <VBox.margin>
-                  <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                  <Insets bottom="4.0" left="4.0" right="4.0" />
                </VBox.margin>
             </TextArea>
             <Separator prefWidth="200.0">
@@ -134,7 +134,7 @@
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>
                   </Button>
-                  <Button fx:id="deleteButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseReleased="#deleteTask" prefHeight="30.0" text="Delete">
+                  <Button fx:id="deleteButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseReleased="#deleteTask" text="Delete">
                      <VBox.margin>
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>

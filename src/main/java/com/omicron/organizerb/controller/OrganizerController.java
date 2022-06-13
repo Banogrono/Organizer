@@ -105,6 +105,7 @@ public class OrganizerController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         loadCategories();
+        setCellFactoryForTaskList(); // experimental
         initializeCategoryContextMenu();
         initializeTaskListContextMenu();
         createAndAddItemsForRepeatMenuButton();
@@ -113,6 +114,11 @@ public class OrganizerController implements Initializable {
     }
 
     // -------------------------> FXML methods
+
+    private void setCellFactoryForTaskList() {
+        activeTasksListView.setCellFactory(lv -> getCustomTaskListCell());
+        completedTasksListView.setCellFactory(lv -> getCustomTaskListCell());
+    }
 
     @FXML
     public void loadTasks(MouseEvent mouseEvent) {
@@ -201,6 +207,7 @@ public class OrganizerController implements Initializable {
         playDoneJingle();
         getSelectedCategoryItem().getTasks().remove(task);
         refreshTaskList();
+        task.setDone(true);
         completedTasksListView.getItems().add(task);
     }
 
@@ -353,6 +360,10 @@ public class OrganizerController implements Initializable {
         };
 
         timer.schedule(job, Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+    }
+
+    private TaskListCellController getCustomTaskListCell() {
+        return TaskListCellController.newInstance();
     }
 
     private void deleteSelectedTask() {
