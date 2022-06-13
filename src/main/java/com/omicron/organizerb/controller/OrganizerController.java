@@ -363,7 +363,11 @@ public class OrganizerController implements Initializable {
     }
 
     private TaskListCellController getCustomTaskListCell() {
-        return TaskListCellController.newInstance();
+        var taskListCell = TaskListCellController.newInstance();
+        if (taskListCell == null) throw new RuntimeException("TaskListCellController object is a null!");
+
+        taskListCell.setOrganizerControllerReference(this);
+        return taskListCell;
     }
 
     private void deleteSelectedTask() {

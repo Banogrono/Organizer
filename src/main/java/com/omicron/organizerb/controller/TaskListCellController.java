@@ -39,6 +39,8 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
 
     private Task task;
 
+    private OrganizerController organizerControllerReference;
+
     // ========================================================================================
     // Constructors, Getters & Setters
     // ========================================================================================
@@ -49,17 +51,28 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
     // Methods
     // ========================================================================================
 
+    // todo: refactor that crap
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
 
         updateSelected(false);
+
         cellHBox.getChildrenUnmodifiable().forEach(child -> {
             child.focusedProperty().addListener((obj, prev, curr) -> {
                 if (!curr) {
                     commitEdit(task);
                 }
             });
+        });
+
+        taskCheckBox.setOnAction(e -> {
+            if (task == null) return;
+            if (taskCheckBox.isSelected()) {
+                task.setDone(true);
+                organizerControllerReference.markTaskAsDone(null);
+            }
+
         });
 
         setGraphic(cellHBox); // this thing sets root graphic node of our custom list cell
@@ -89,6 +102,7 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
         super.updateItem(task, isEmpty);
         cellHBox.getChildrenUnmodifiable().forEach(c -> c.setVisible(!isEmpty));
         if (isEmpty) return;
+        this.task = task;
         taskCheckBox.setText(task.getTitle());
         taskCheckBox.setSelected(task.isDone());
     }
@@ -98,12 +112,9 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
         super.updateSelected(selected);
         // update UI hints based on selected state
         cellHBox.getChildrenUnmodifiable().forEach(c -> {
-            // setting mouse-transparent to false ensure that
-            // the cell will get selected we click on a field in
-            // a non-selected cell
+            // setting mouse-transparent to false ensure that the cell will get selected we click on a field in a non-selected cell
             c.setMouseTransparent(!selected);
-            // focus-traversable prevents users from "tabbing"
-            // out of the currently selected cell
+            // focus-traversable prevents users from "tabbing" out of the currently selected cell
             c.setFocusTraversable(selected);
         });
         if (selected) {
@@ -111,9 +122,7 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
             startEdit();
         } else {
             if (task != null) {
-                // commit edits if the cell becomes unselected
-                // we're not keeping track of "dirty" state
-                // so this will commit changes even to unmodified cells
+                // commit edits if the cell becomes unselected we're not keeping track of "dirty" state so this will commit changes even to unmodified cells
                 commitEdit(task);
             }
         }
@@ -121,12 +130,17 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
 
     @Override
     public void commitEdit(Task newValue) {
-        // if newValue isn't defined, use this.model
+
         newValue = (newValue == null) ? this.task : newValue;
+
         super.commitEdit(newValue); // <-- important
-        // update the model with values from the text fields
+
         if (this.task == null) return;
         newValue.setDone(task.isDone());
+    }
+
+    public void setOrganizerControllerReference (OrganizerController reference) {
+        this.organizerControllerReference = reference;
     }
 
 
