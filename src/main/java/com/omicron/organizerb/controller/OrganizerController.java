@@ -7,10 +7,11 @@ import com.omicron.organizerb.model.TaskPriority;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -35,7 +36,6 @@ public class OrganizerController implements Initializable {
     // ========================================================================================
 
     // -------------------------> FXML components
-
 
     @FXML
     public ListView categoriesListView;
@@ -96,6 +96,8 @@ public class OrganizerController implements Initializable {
 
     ArrayList<TaskList> categories;
 
+    final int MAX_ICON_SIZE = 24;
+
 
     // ========================================================================================
     // Methods
@@ -104,29 +106,84 @@ public class OrganizerController implements Initializable {
     // -------------------------> Override methods
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        loadCategories();
-        setCellFactoryForTaskList(); // experimental
+        loadAndRefreshCategories();
+        setCellFactoryForActiveAndCompletedTaskList(); // experimental do poprawy
+
         initializeCategoryContextMenu();
         initializeTaskListContextMenu();
-        createAndAddItemsForRepeatMenuButton();
-        setActionsForRemindMeMenuButton();
+        initializeRepeatMenuButton();
+        initializeRemindMeMenuButton();
+        setIconsForButtons();
+
         loadBackgroundsFromDirectory();
     }
 
     // -------------------------> FXML methods
 
-    private void setCellFactoryForTaskList() {
-        activeTasksListView.setCellFactory(lv -> getCustomTaskListCell());
-        completedTasksListView.setCellFactory(lv -> getCustomTaskListCell());
-    }
-
     @FXML
-    public void loadTasks(MouseEvent mouseEvent) {
+    public void loadTasksEventHandler(MouseEvent mouseEvent) {
         refreshTaskList();
     }
 
     @FXML
-    public void addTask(KeyEvent event) {
+    public void addTaskEventHandler(KeyEvent event) {
+        addNewTaskToSelectedCategory(event);
+    }
+
+    @FXML
+    public void addCategoryEventHandler(KeyEvent event) {
+        addNewCategory(event);
+    }
+
+    @FXML
+    public void loadTaskDetailsEventHandler(MouseEvent mouseEvent) {
+        refreshTaskDetails();
+    }
+
+    @FXML
+    public void updateTaskDescriptionEventHandler(MouseEvent mouseEvent) {
+        updateTaskDescription();
+    }
+
+    @FXML
+    public void addTaskDueDateEventHandler(ActionEvent mouseEvent) {
+        setTaskDeadLine();
+    }
+
+    @FXML
+    public void deleteTaskEventHandler(MouseEvent mouseEvent) {
+        if (getSelectedTask() != null)
+            deleteSelectedTaskAndRefresh();
+
+        deleteSelectedTaskFromCompletedTasksAndRefresh();
+    }
+
+    @FXML
+    public void markTaskAsDoneEventHandler(ActionEvent event) {
+        markTaskAsDoneAndAddToCompletedList();
+    }
+
+    // -------------------------> internal methods
+
+    private void markTaskAsDoneAndAddToCompletedList() {
+        var task = getSelectedTask();
+        if (task == null) return;
+
+        task.setDone(true);
+        getSelectedCategoryItem().getTasks().remove(task);
+        completedTasksListView.getItems().add(task);
+
+        playDoneJingle();
+        refreshTaskList();
+
+    }
+
+    private void setTaskDeadLine() {
+        if (addDueDatePicker.getValue() != null)
+            setTaskDeadLine(addDueDatePicker.getValue());
+    }
+
+    private void addNewTaskToSelectedCategory(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
             if (!(addTaskTextField.getText() == null || addTaskTextField.getText().isBlank())) {
 
@@ -135,91 +192,66 @@ public class OrganizerController implements Initializable {
                 task.setTitle(addTaskTextField.getText());
 
                 addTaskToTaskList(task);
-
                 refreshTaskList();
-
                 clearAddTaskTextFiled();
             }
         }
     }
 
-    @FXML
-    public void addCategory(KeyEvent event) {
+    private void addNewCategory(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
             if (!(addCategoryTextField.getText() == null || addCategoryTextField.getText().isBlank())) {
 
-                // create new task
+                // create new taskList, aka category
                 var taskList = new TaskList();
+
                 taskList.setTaskListTitle(addCategoryTextField.getText());
-
                 categories.add(taskList);
-
                 refreshCategories();
-
                 addCategoryTextField.setText("");
             }
         }
     }
 
-    @FXML
-    public void loadTaskDetails(MouseEvent mouseEvent) {
-        refreshTaskDetails();
+    private void setCellFactoryForActiveAndCompletedTaskList() {
+        activeTasksListView.setCellFactory(lv -> getCustomTaskListCellController());
+        completedTasksListView.setCellFactory(lv -> getCustomTaskListCellController());
     }
 
-    @FXML
-    public void saveTaskDescription(MouseEvent mouseEvent) {
-        saveTaskDescriptionFromTextArea();
+    private void setIconsForButtons() {
+
+        setIconForNodesExtendingButtonBase(saveButton, "src/main/resources/icons/save.png");
+        setIconForNodesExtendingButtonBase(markAsDoneButton, "src/main/resources/icons/done.png");
+        setIconForNodesExtendingButtonBase(deleteButton, "src/main/resources/icons/delete.png");
+
+        setIconForNodesExtendingButtonBase(remindMeMenuButton, "src/main/resources/icons/remind.png");
+        setIconForNodesExtendingButtonBase(repeatMenuButton, "src/main/resources/icons/repeat.png");
+        setIconForNodesExtendingButtonBase(backgroundMenuButton, "src/main/resources/icons/background.png");
     }
 
-    @FXML
-    public void setReminderForTask(MouseEvent mouseEvent) {
-        // todo implement this
-    }
-
-    @FXML
-    public void addTaskDueDate(ActionEvent mouseEvent) {
-        setTaskDeadLine(addDueDatePicker.getValue());
-    }
-
-    @FXML
-    public void repeatTask(ActionEvent event) {
-        // todo implement this
-    }
-
-    @FXML
-    public void deleteTask(MouseEvent mouseEvent) {
-        // todo refactor
-        if (getSelectedTask() != null) {
-            deleteSelectedTask();
-            return;
-        }
-
-        if (getSelectedTaskFromCompletedTasksList() != null) {
-            deleteSelectedTaskFromCompletedTasks();
+    private void setIconForNodesExtendingButtonBase(ButtonBase buttonBase, String pathToIcon) {
+        try {
+            buttonBase.setGraphic(getIcon(pathToIcon));
+            buttonBase.alignmentProperty().setValue(Pos.BOTTOM_LEFT);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
-    @FXML
-    public void markTaskAsDone(ActionEvent event) {
-        var task = getSelectedTask();
-        if (task == null) return;
-
-        playDoneJingle();
-        getSelectedCategoryItem().getTasks().remove(task);
-        refreshTaskList();
-        task.setDone(true);
-        completedTasksListView.getItems().add(task);
+    private ImageView getIcon(String path) throws MalformedURLException {
+        var img = new ImageView(new Image(new File(path).toURI().toURL().toString()));
+        img.fitWidthProperty().setValue(MAX_ICON_SIZE);
+        img.fitHeightProperty().setValue(MAX_ICON_SIZE);
+        return img;
     }
 
-
-    // -------------------------> internal methods
     private void initializeTaskListContextMenu() {
 
         // todo: refactor
 
         var markTaskAsDone = new MenuItem("Done");
         markTaskAsDone.setOnAction(event -> {
-            markTaskAsDone(null);
+            markTaskAsDoneEventHandler(null);
         });
 
 
@@ -243,14 +275,14 @@ public class OrganizerController implements Initializable {
 
         var deleteTask = new MenuItem("Delete task");
         deleteTask.setOnAction(event -> {
-            deleteTask(null);
+            deleteTaskEventHandler(null);
         });
 
 
         var setTaskPriority = new Menu("Set priority...");
         for (var priority : TaskPriority.values()) {
             var priorityItem = new MenuItem(priority.name());
-            priorityItem.setOnAction(e -> setTaskPriority(priority));
+            priorityItem.setOnAction(e -> setPriorityForSelectedTask(priority));
             setTaskPriority.getItems().add(priorityItem);
         }
 
@@ -260,24 +292,28 @@ public class OrganizerController implements Initializable {
 
     private void initializeCategoryContextMenu() {
 
-        var deleteCategory = new MenuItem("Delete category");
-        deleteCategory.setOnAction(event -> {
-            if (getSelectedCategoryItem() == null) return;
-            categories.remove(getSelectedCategoryItem());
-            categoriesListView.getItems().remove(getSelectedCategoryItem());
-        });
+        var deleteCategoryMenuItem = new MenuItem("Delete category");
+        deleteCategoryMenuItem.setOnAction(event -> deleteCategory());
 
-        categoryContextMenu.getItems().add(deleteCategory);
+        categoryContextMenu.getItems().add(deleteCategoryMenuItem);
     }
 
-    private void setTaskPriority(TaskPriority priority) {
+    private void deleteCategory() {
+        if (getSelectedCategoryItem() == null) return;
+
+        categories.remove(getSelectedCategoryItem());
+        categoriesListView.getItems().remove(getSelectedCategoryItem());
+    }
+
+    private void setPriorityForSelectedTask(TaskPriority priority) {
         var task = getSelectedTask();
         if (task == null) return;
+
         task.setPriority(priority);
         // todo: add some kind of colors to distinguish between tasks with different priorities
     }
 
-    private void createAndAddItemsForRepeatMenuButton() {
+    private void initializeRepeatMenuButton() {
         var repeatDaily = new MenuItem("Daily");
         repeatDaily.setOnAction(e -> setTaskRepetition(getSelectedTask(), RepeatTask.DAILY));
 
@@ -303,13 +339,12 @@ public class OrganizerController implements Initializable {
         task.setRepetition(repetition);
     }
 
-    private void setActionsForRemindMeMenuButton() {
+    private void initializeRemindMeMenuButton() {
 
         var remindMeLaterToday = new MenuItem("Later today");
         var remindMeTomorrow = new MenuItem("Tomorrow");
         var remindMeNextWeek = new MenuItem("Next Week");
         var remindMeCustomTime = new MenuItem("Custom");
-
 
         // todo: see if that even works
         remindMeLaterToday.setOnAction(e -> setReminder(7200000)); // 2 hours
@@ -318,91 +353,86 @@ public class OrganizerController implements Initializable {
 
 
         remindMeMenuButton.getItems().addAll(remindMeLaterToday, remindMeTomorrow, remindMeNextWeek, remindMeCustomTime);
-
     }
 
-    private FXMLLoader getDialogFXMLLoader(String path) {
-        try {
-            var dialogFXML = new File(path).toURI().toURL();
-            return new FXMLLoader(dialogFXML);
-        }catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 
-    // todo: refactor this code
     private void setReminder(long delay) {
 
         Timer timer = new Timer();
-        TimerTask job = new TimerTask() {
-            @Override
-            public void run() {
-                // play remind jingle
-                playReminderJingle();
-                // todo: set off alert box with task info
+        TimerTask job = getTimerTask();
 
-            }
-        };
         timer.schedule(job, delay);
     }
 
     private void setReminder(LocalDate date) {
 
         Timer timer = new Timer();
-        TimerTask job = new TimerTask() {
-            @Override
-            public void run() {
-                // play remind jingle
-                playReminderJingle();
-                // todo: set off alert box with task info
-
-            }
-        };
+        TimerTask job = getTimerTask();
 
         timer.schedule(job, Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()));
     }
 
-    private TaskListCellController getCustomTaskListCell() {
-        var taskListCell = TaskListCellController.newInstance();
-        if (taskListCell == null) throw new RuntimeException("TaskListCellController object is a null!");
+    private TimerTask getTimerTask() {
+        return new TimerTask() {
+            @Override
+            public void run() {
+                // play remind jingle
+                playReminderJingle();
 
+                // todo: set off alert box with task info
+            }
+        };
+    }
+
+    private TaskListCellController getCustomTaskListCellController() {
+        var taskListCell = TaskListCellController.newInstance();
+
+        if (taskListCell == null)
+            throw new RuntimeException("TaskListCellController object is a null!");
+
+        // set reference of this object in task list controller, so it can access methods of this object
         taskListCell.setOrganizerControllerReference(this);
         return taskListCell;
     }
 
-    private void deleteSelectedTask() {
+    private void deleteSelectedTaskAndRefresh() {
         if (getSelectedTask() == null) return;
         getSelectedCategoryItem().getTasks().remove(getSelectedTask());
         refreshTaskList();
     }
 
-    private void deleteSelectedTaskFromCompletedTasks() {
+    private void deleteSelectedTaskFromCompletedTasksAndRefresh() {
         if (getSelectedTaskFromCompletedTasksList() == null) return;
+
         completedTasksListView.getItems().remove(getSelectedTaskFromCompletedTasksList());
         completedTasksListView.refresh();
     }
 
     private void playReminderJingle() {
        try {
-           var soundFile = new File("src/main/resources/jingels/alarm.mp3");
-           playSound(soundFile);
-       } catch (Exception e) {
+           playSound(getFile("src/main/resources/jingels/alarm.mp3"));
+       } catch (MalformedURLException e) {
            throw new RuntimeException(e);
        }
     }
 
     private void playDoneJingle() {
         try {
-            var soundFile = new File("src/main/resources/jingels/done.mp3");
-            playSound(soundFile);
-        } catch (Exception e) {
+            playSound(getFile("src/main/resources/jingels/done.mp3"));
+        } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
     }
 
+    private File getFile(String pathname) {
+        return new File(pathname);
+    }
+
     private void playSound(File soundFile) throws MalformedURLException {
         Media sound = new Media(soundFile.toURI().toURL().toString());
+
         MediaPlayer mediaPlayer = new MediaPlayer(sound);
+
         mediaPlayer.play();
     }
 
@@ -412,34 +442,31 @@ public class OrganizerController implements Initializable {
         getSelectedTask().setDate(date);
     }
 
-    private String[] findBackgroundsInDirectory(String path) {
-        var file = new File(path);
+    private String[] getListOfAvailableBackgrounds(String path) {
+        File file = getFile(path);
         return file.list();
     }
 
     private void loadBackgroundsFromDirectory() {
-        try {
-            // get all backgrounds from background folder
-           var pathToBGFolder = "src/main/resources/backgrounds/";
-           var backgrounds = findBackgroundsInDirectory(pathToBGFolder);
 
-           // add newly-found backgrounds to the menu button
-            for (var image : backgrounds) {
+        // get all backgrounds from background folder
+        var pathToBGFolder = "src/main/resources/backgrounds/";
+        var backgrounds = getListOfAvailableBackgrounds(pathToBGFolder);
 
-                var item = new MenuItem(image);
-                item.setOnAction(event -> setBackground(pathToBGFolder, image));
-                backgroundMenuButton.getItems().add(item);
-            }
+        // add newly-found backgrounds to the menu button as an item
+        for (var image : backgrounds) {
 
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            var item = new MenuItem(image);
+            item.setOnAction(event -> setBackground(pathToBGFolder, image));
+            backgroundMenuButton.getItems().add(item);
         }
+
     }
 
     private void setBackground(String pathToBGFolder, String image) {
         try {
-            var bg = createBackgroundForHBox(new Image(new FileInputStream(pathToBGFolder + image)));
-            backgroundHBox.setBackground(bg);
+            var background = createBackgroundForHBox(new Image(new FileInputStream(pathToBGFolder + image)));
+            backgroundHBox.setBackground(background);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -455,17 +482,17 @@ public class OrganizerController implements Initializable {
                 size));
     }
 
-    private void loadCategories() {
+    private void loadAndRefreshCategories() {
         categories = new ArrayList<>();
-        createAndLoadSampleData();
+        createAndLoadSampleData(); // todo get rid of that at some point
         refreshCategories();
     }
 
-    private void saveTaskDescriptionFromTextArea() {
-        String content = taskDescriptionTextArea.getText();
-        if (content == null || content.isBlank()) return;
+    private void updateTaskDescription() {
+        var content = taskDescriptionTextArea.getText();
+        var task = getSelectedTask();
 
-        if (getSelectedTask() == null) return;
+        if (content == null || content.isBlank() || task == null) return;
 
         getSelectedTask().setDescription(content);
         refreshTaskDetails();
@@ -480,13 +507,14 @@ public class OrganizerController implements Initializable {
         if (selectedCategoryIndex < 0 || selectedCategoryIndex >= categories.size()) return;
 
         var tasks = categories.get(selectedCategoryIndex);
+
         activeTasksListView.setItems(FXCollections.observableArrayList(tasks.getTasks()));
         setContentOfCategoryLabel();
     }
 
     private void refreshTaskDetails () {
         if (getSelectedTask() == null) return;
-        setContentOfTaskDetails();
+        setContentOfDescriptionTextAreaInTaskDetailsPane();
         setContentOfTaskTitleLabel();
         setContentOfDatePicker();
     }
@@ -500,22 +528,20 @@ public class OrganizerController implements Initializable {
     }
 
     private void setContentOfTaskTitleLabel() {
-        var task = getSelectedTask();
+        Task task = getSelectedTask();
 
-        var title = task.getTitle() == null ? "" : task.getTitle();
+        String title = task.getTitle() == null ? "" : task.getTitle();
+
         taskTitleLabel.setText(title);
     }
 
-    private void setContentOfTaskDetails() {
+    private void setContentOfDescriptionTextAreaInTaskDetailsPane() {
 
         var description = getSelectedTask().getDescription();
 
-        if (description == null || description.isBlank()) {
-            taskDescriptionTextArea.setText("");
-            return;
-        }
+        if (description != null)
+            taskDescriptionTextArea.setText(description);
 
-        taskDescriptionTextArea.setText(description);
     }
 
     private int getSelectedCategoryIndex () {
@@ -524,10 +550,6 @@ public class OrganizerController implements Initializable {
 
     private TaskList getSelectedCategoryItem () {
         return (TaskList) categoriesListView.getSelectionModel().getSelectedItem();
-    }
-
-    private int getSelectedTaskIndex () {
-        return activeTasksListView.getSelectionModel().getSelectedIndex();
     }
 
     private Task getSelectedTask () {
@@ -578,6 +600,6 @@ public class OrganizerController implements Initializable {
 
     }
 
-
-
+    public void repeatTaskEventHandler(ActionEvent event) {
+    }
 }
