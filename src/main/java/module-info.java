@@ -7,6 +7,7 @@ module com.omicron.organizerb {
     opens com.omicron.organizerb to javafx.fxml;
     exports com.omicron.organizerb;
     exports com.omicron.organizerb.controller;
+    exports com.omicron.organizerb.model;
     opens com.omicron.organizerb.controller to javafx.fxml;
 
 }

@@ -103,7 +103,7 @@ public class OrganizerController implements Initializable {
     // Methods
     // ========================================================================================
 
-    // -------------------------> Override methods
+    // -------------------------> Overridden methods
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         loadAndRefreshCategories();
@@ -166,7 +166,7 @@ public class OrganizerController implements Initializable {
     // -------------------------> internal methods
 
     private void markTaskAsDoneAndAddToCompletedList() {
-        var task = getSelectedTask();
+        Task task = getSelectedTask();
         if (task == null) return;
 
         task.setDone(true);
@@ -188,7 +188,7 @@ public class OrganizerController implements Initializable {
             if (!(addTaskTextField.getText() == null || addTaskTextField.getText().isBlank())) {
 
                 // create new task
-                var task = new Task();
+                Task task = new Task();
                 task.setTitle(addTaskTextField.getText());
 
                 addTaskToTaskList(task);
@@ -203,7 +203,7 @@ public class OrganizerController implements Initializable {
             if (!(addCategoryTextField.getText() == null || addCategoryTextField.getText().isBlank())) {
 
                 // create new taskList, aka category
-                var taskList = new TaskList();
+                TaskList taskList = new TaskList();
 
                 taskList.setTaskListTitle(addCategoryTextField.getText());
                 categories.add(taskList);
@@ -239,7 +239,7 @@ public class OrganizerController implements Initializable {
     }
 
     private ImageView getIcon(String path) throws MalformedURLException {
-        var img = new ImageView(new Image(new File(path).toURI().toURL().toString()));
+        ImageView img = new ImageView(new Image(new File(path).toURI().toURL().toString()));
         img.fitWidthProperty().setValue(MAX_ICON_SIZE);
         img.fitHeightProperty().setValue(MAX_ICON_SIZE);
         return img;
@@ -247,52 +247,69 @@ public class OrganizerController implements Initializable {
 
     private void initializeTaskListContextMenu() {
 
-        // todo: refactor
+        MenuItem markTaskAsDone = initializeMarkTaskAsDoneMenuItem();
+        Menu moveTask = initializeMoveTaskToMenu();
+        MenuItem deleteTask = initializeDeleteTaskMenuItem();
+        Menu setTaskPriority = initializeSetTaskPriorityMenu();
 
-        var markTaskAsDone = new MenuItem("Done");
+        taskListContextMenu.getItems().addAll(markTaskAsDone, moveTask, deleteTask, setTaskPriority);
+    }
+
+    private Menu initializeSetTaskPriorityMenu() {
+        Menu setTaskPriority = new Menu("Set priority...");
+
+        for (var priority : TaskPriority.values()) {
+            MenuItem priorityItem = new MenuItem(priority.name());
+            priorityItem.setOnAction(e -> setPriorityForSelectedTask(priority));
+            setTaskPriority.getItems().add(priorityItem);
+        }
+
+        return setTaskPriority;
+    }
+
+    private MenuItem initializeDeleteTaskMenuItem() {
+        MenuItem deleteTask = new MenuItem("Delete task");
+
+        deleteTask.setOnAction(event -> {
+            deleteTaskEventHandler(null);
+        });
+        return deleteTask;
+    }
+
+    private MenuItem initializeMarkTaskAsDoneMenuItem() {
+        MenuItem markTaskAsDone = new MenuItem("Done");
+
         markTaskAsDone.setOnAction(event -> {
             markTaskAsDoneEventHandler(null);
         });
+        return markTaskAsDone;
+    }
 
+    private Menu initializeMoveTaskToMenu() {
+        Menu moveTask = new Menu("Move task to...");
 
-        var moveTask = new Menu("Move task to...");
         for (int i = 0; i < categoriesListView.getItems().size(); i++) {
-            var category = (TaskList) categoriesListView.getItems().get(i);
 
-            var menuItem = new MenuItem(category.getTaskListTitle());
+            TaskList category = (TaskList) categoriesListView.getItems().get(i);
+
+            MenuItem menuItem = new MenuItem(category.getTaskListTitle());
 
             menuItem.setOnAction(e -> {
-                var task = getSelectedTask();
+                Task task = getSelectedTask();
                 if (task == null) return;
 
                 getSelectedCategoryItem().getTasks().remove(task);
                 category.addTask(task);
                 refreshTaskList();
-
             });
             moveTask.getItems().add(menuItem);
         }
-
-        var deleteTask = new MenuItem("Delete task");
-        deleteTask.setOnAction(event -> {
-            deleteTaskEventHandler(null);
-        });
-
-
-        var setTaskPriority = new Menu("Set priority...");
-        for (var priority : TaskPriority.values()) {
-            var priorityItem = new MenuItem(priority.name());
-            priorityItem.setOnAction(e -> setPriorityForSelectedTask(priority));
-            setTaskPriority.getItems().add(priorityItem);
-        }
-
-
-        taskListContextMenu.getItems().addAll(markTaskAsDone, moveTask, deleteTask, setTaskPriority);
+        return moveTask;
     }
 
     private void initializeCategoryContextMenu() {
 
-        var deleteCategoryMenuItem = new MenuItem("Delete category");
+        MenuItem deleteCategoryMenuItem = new MenuItem("Delete category");
         deleteCategoryMenuItem.setOnAction(event -> deleteCategory());
 
         categoryContextMenu.getItems().add(deleteCategoryMenuItem);
@@ -306,7 +323,7 @@ public class OrganizerController implements Initializable {
     }
 
     private void setPriorityForSelectedTask(TaskPriority priority) {
-        var task = getSelectedTask();
+        Task task = getSelectedTask();
         if (task == null) return;
 
         task.setPriority(priority);
@@ -314,19 +331,19 @@ public class OrganizerController implements Initializable {
     }
 
     private void initializeRepeatMenuButton() {
-        var repeatDaily = new MenuItem("Daily");
+        MenuItem repeatDaily = new MenuItem("Daily");
         repeatDaily.setOnAction(e -> setTaskRepetition(getSelectedTask(), RepeatTask.DAILY));
 
-        var repeatWeekly = new MenuItem("Weekly");
+        MenuItem repeatWeekly = new MenuItem("Weekly");
         repeatDaily.setOnAction(e -> setTaskRepetition(getSelectedTask(), RepeatTask.WEEKLY));
 
-        var repeatMonthly = new MenuItem("Monthly");
+        MenuItem repeatMonthly = new MenuItem("Monthly");
         repeatDaily.setOnAction(e -> setTaskRepetition(getSelectedTask(), RepeatTask.MONTHLY));
 
-        var repeatYearly = new MenuItem("Yearly");
+        MenuItem repeatYearly = new MenuItem("Yearly");
         repeatDaily.setOnAction(e -> setTaskRepetition(getSelectedTask(), RepeatTask.YEARLY));
 
-        var doNotRepeat = new MenuItem("Do not repeat");
+        MenuItem doNotRepeat = new MenuItem("Do not repeat");
         repeatDaily.setOnAction(e -> setTaskRepetition(getSelectedTask(), RepeatTask.NONE));
 
 
@@ -341,10 +358,10 @@ public class OrganizerController implements Initializable {
 
     private void initializeRemindMeMenuButton() {
 
-        var remindMeLaterToday = new MenuItem("Later today");
-        var remindMeTomorrow = new MenuItem("Tomorrow");
-        var remindMeNextWeek = new MenuItem("Next Week");
-        var remindMeCustomTime = new MenuItem("Custom");
+        MenuItem remindMeLaterToday = new MenuItem("Later today");
+        MenuItem remindMeTomorrow = new MenuItem("Tomorrow");
+        MenuItem remindMeNextWeek = new MenuItem("Next Week");
+        MenuItem remindMeCustomTime = new MenuItem("Custom");
 
         // todo: see if that even works
         remindMeLaterToday.setOnAction(e -> setReminder(7200000)); // 2 hours
@@ -354,7 +371,6 @@ public class OrganizerController implements Initializable {
 
         remindMeMenuButton.getItems().addAll(remindMeLaterToday, remindMeTomorrow, remindMeNextWeek, remindMeCustomTime);
     }
-
 
     private void setReminder(long delay) {
 
@@ -385,7 +401,7 @@ public class OrganizerController implements Initializable {
     }
 
     private TaskListCellController getCustomTaskListCellController() {
-        var taskListCell = TaskListCellController.newInstance();
+        TaskListCellController taskListCell = TaskListCellController.newInstance();
 
         if (taskListCell == null)
             throw new RuntimeException("TaskListCellController object is a null!");
@@ -450,13 +466,13 @@ public class OrganizerController implements Initializable {
     private void loadBackgroundsFromDirectory() {
 
         // get all backgrounds from background folder
-        var pathToBGFolder = "src/main/resources/backgrounds/";
-        var backgrounds = getListOfAvailableBackgrounds(pathToBGFolder);
+        String pathToBGFolder = "src/main/resources/backgrounds/";
+        String[] backgrounds = getListOfAvailableBackgrounds(pathToBGFolder);
 
         // add newly-found backgrounds to the menu button as an item
         for (var image : backgrounds) {
 
-            var item = new MenuItem(image);
+            MenuItem item = new MenuItem(image);
             item.setOnAction(event -> setBackground(pathToBGFolder, image));
             backgroundMenuButton.getItems().add(item);
         }
@@ -465,7 +481,7 @@ public class OrganizerController implements Initializable {
 
     private void setBackground(String pathToBGFolder, String image) {
         try {
-            var background = createBackgroundForHBox(new Image(new FileInputStream(pathToBGFolder + image)));
+            Background background = createBackgroundForHBox(new Image(new FileInputStream(pathToBGFolder + image)));
             backgroundHBox.setBackground(background);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
@@ -473,7 +489,7 @@ public class OrganizerController implements Initializable {
     }
 
     private Background createBackgroundForHBox(Image image) {
-        var size = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true);
+        BackgroundSize size = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true);
 
         return new Background(new BackgroundImage(image,
                 BackgroundRepeat.NO_REPEAT,
@@ -489,8 +505,8 @@ public class OrganizerController implements Initializable {
     }
 
     private void updateTaskDescription() {
-        var content = taskDescriptionTextArea.getText();
-        var task = getSelectedTask();
+        String content = taskDescriptionTextArea.getText();
+        Task task = getSelectedTask();
 
         if (content == null || content.isBlank() || task == null) return;
 
@@ -506,7 +522,7 @@ public class OrganizerController implements Initializable {
         int selectedCategoryIndex = getSelectedCategoryIndex();
         if (selectedCategoryIndex < 0 || selectedCategoryIndex >= categories.size()) return;
 
-        var tasks = categories.get(selectedCategoryIndex);
+        TaskList tasks = categories.get(selectedCategoryIndex);
 
         activeTasksListView.setItems(FXCollections.observableArrayList(tasks.getTasks()));
         setContentOfCategoryLabel();
@@ -537,7 +553,7 @@ public class OrganizerController implements Initializable {
 
     private void setContentOfDescriptionTextAreaInTaskDetailsPane() {
 
-        var description = getSelectedTask().getDescription();
+        String description = getSelectedTask().getDescription();
 
         if (description != null)
             taskDescriptionTextArea.setText(description);
@@ -568,29 +584,30 @@ public class OrganizerController implements Initializable {
         getSelectedCategoryItem().addTask(task);
     }
 
+
     // -------------------------> test/ debug methods
 
     private void createAndLoadSampleData() {
 
         // create some sample tasks
-        var taskA = new Task();
+        Task taskA = new Task();
         taskA.setTitle("Do something...");
 
-        var taskB = new Task();
+        Task taskB = new Task();
         taskB.setTitle("Do that other thing that you had to do yesterday...");
 
-        var taskC = new Task();
+        Task taskC = new Task();
         taskC.setTitle("Do anything you want to do...");
 
 
         // create sample taskList objects
-        var taskList1 = new TaskList("in");
+        TaskList taskList1 = new TaskList("in");
         taskList1.addTask(taskA);
 
-        var taskList2 = new TaskList("important");
+        TaskList taskList2 = new TaskList("important");
         taskList2.addTask(taskB);
 
-        var taskList3 = new TaskList("Planned");
+        TaskList taskList3 = new TaskList("Planned");
         taskList3.addTask(taskC);
 
         // add sample taskList objects to categories object
@@ -600,6 +617,4 @@ public class OrganizerController implements Initializable {
 
     }
 
-    public void repeatTaskEventHandler(ActionEvent event) {
-    }
 }

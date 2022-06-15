@@ -12,6 +12,12 @@ import java.net.URL;
 import java.nio.file.Path;
 
 public class Main extends Application {
+
+
+    public static void main(String[] args) {
+        launch();
+    }
+
     @Override
     public void start(Stage stage) throws IOException {
 
@@ -23,7 +29,4 @@ public class Main extends Application {
         stage.show();
     }
 
-    public static void main(String[] args) {
-        launch();
-    }
 }
