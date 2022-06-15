@@ -7,12 +7,8 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
-import java.nio.file.Path;
 
 public class Main extends Application {
-
 
     public static void main(String[] args) {
         launch();
@@ -27,6 +23,7 @@ public class Main extends Application {
         stage.setTitle("Organizer");
         stage.setScene(scene);
         stage.show();
+
     }
 
 }

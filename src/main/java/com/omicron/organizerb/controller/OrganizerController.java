@@ -4,8 +4,8 @@ import com.omicron.organizerb.model.RepeatTask;
 import com.omicron.organizerb.model.Task;
 import com.omicron.organizerb.model.TaskList;
 import com.omicron.organizerb.model.TaskPriority;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -14,7 +14,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -38,16 +37,16 @@ public class OrganizerController implements Initializable {
     // -------------------------> FXML components
 
     @FXML
-    public ListView categoriesListView;
+    public ListView<TaskList> categoriesListView;
 
     @FXML
     public Label taskListLabel;
 
     @FXML
-    public ListView activeTasksListView;
+    public ListView<Task> activeTasksListView;
 
     @FXML
-    public ListView completedTasksListView;
+    public ListView<Task> completedTasksListView;
 
     @FXML
     public Label taskTitleLabel;
@@ -116,12 +115,14 @@ public class OrganizerController implements Initializable {
         setIconsForButtons();
 
         loadBackgroundsFromDirectory();
+
+
     }
 
     // -------------------------> FXML methods
 
     @FXML
-    public void loadTasksEventHandler(MouseEvent mouseEvent) {
+    public void loadTasksEventHandler() {
         refreshTaskList();
     }
 
@@ -136,22 +137,22 @@ public class OrganizerController implements Initializable {
     }
 
     @FXML
-    public void loadTaskDetailsEventHandler(MouseEvent mouseEvent) {
+    public void loadTaskDetailsEventHandler() {
         refreshTaskDetails();
     }
 
     @FXML
-    public void updateTaskDescriptionEventHandler(MouseEvent mouseEvent) {
+    public void updateTaskDescriptionEventHandler() {
         updateTaskDescription();
     }
 
     @FXML
-    public void addTaskDueDateEventHandler(ActionEvent mouseEvent) {
+    public void addTaskDueDateEventHandler() {
         setTaskDeadLine();
     }
 
     @FXML
-    public void deleteTaskEventHandler(MouseEvent mouseEvent) {
+    public void deleteTaskEventHandler() {
         if (getSelectedTask() != null)
             deleteSelectedTaskAndRefresh();
 
@@ -159,11 +160,20 @@ public class OrganizerController implements Initializable {
     }
 
     @FXML
-    public void markTaskAsDoneEventHandler(ActionEvent event) {
+    public void markTaskAsDoneEventHandler() {
         markTaskAsDoneAndAddToCompletedList();
     }
 
     // -------------------------> internal methods
+
+    private void disableTaskRelatedButtonsAndMenus(boolean value) {
+        deleteButton.disableProperty().setValue(value);
+        saveButton.disableProperty().setValue(value);
+        remindMeMenuButton.disableProperty().setValue(value);
+        repeatMenuButton.disableProperty().setValue(value);
+        markAsDoneButton.disableProperty().setValue(value);
+        addDueDatePicker.disableProperty().setValue(value);
+    }
 
     private void markTaskAsDoneAndAddToCompletedList() {
         Task task = getSelectedTask();
@@ -233,7 +243,7 @@ public class OrganizerController implements Initializable {
         try {
             buttonBase.setGraphic(getIcon(pathToIcon));
             buttonBase.alignmentProperty().setValue(Pos.BOTTOM_LEFT);
-        } catch (Exception e) {
+        } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
     }
@@ -270,18 +280,14 @@ public class OrganizerController implements Initializable {
     private MenuItem initializeDeleteTaskMenuItem() {
         MenuItem deleteTask = new MenuItem("Delete task");
 
-        deleteTask.setOnAction(event -> {
-            deleteTaskEventHandler(null);
-        });
+        deleteTask.setOnAction(event -> deleteTaskEventHandler());
         return deleteTask;
     }
 
     private MenuItem initializeMarkTaskAsDoneMenuItem() {
         MenuItem markTaskAsDone = new MenuItem("Done");
 
-        markTaskAsDone.setOnAction(event -> {
-            markTaskAsDoneEventHandler(null);
-        });
+        markTaskAsDone.setOnAction(event -> markTaskAsDoneEventHandler());
         return markTaskAsDone;
     }
 
@@ -290,7 +296,7 @@ public class OrganizerController implements Initializable {
 
         for (int i = 0; i < categoriesListView.getItems().size(); i++) {
 
-            TaskList category = (TaskList) categoriesListView.getItems().get(i);
+            TaskList category = categoriesListView.getItems().get(i);
 
             MenuItem menuItem = new MenuItem(category.getTaskListTitle());
 
@@ -363,10 +369,11 @@ public class OrganizerController implements Initializable {
         MenuItem remindMeNextWeek = new MenuItem("Next Week");
         MenuItem remindMeCustomTime = new MenuItem("Custom");
 
-        // todo: see if that even works
+        // todo: figure out how to save that | think about custom time
         remindMeLaterToday.setOnAction(e -> setReminder(7200000)); // 2 hours
         remindMeTomorrow.setOnAction(e -> setReminder(LocalDate.now().plusDays(1))); // 1 day
         remindMeNextWeek.setOnAction(e -> setReminder(LocalDate.now().plusDays(7))); // 1 week
+        remindMeCustomTime.setOnAction(e -> Platform.runLater(() -> CustomTimePopupController.display(getSelectedTask())));
 
 
         remindMeMenuButton.getItems().addAll(remindMeLaterToday, remindMeTomorrow, remindMeNextWeek, remindMeCustomTime);
@@ -374,21 +381,29 @@ public class OrganizerController implements Initializable {
 
     private void setReminder(long delay) {
 
+        Task task = getSelectedTask();
+
+        if (task == null) return;
+
         Timer timer = new Timer();
-        TimerTask job = getTimerTask();
+        TimerTask job = getTimerTask(task);
 
         timer.schedule(job, delay);
     }
 
     private void setReminder(LocalDate date) {
 
+        Task task = getSelectedTask();
+
+        if (task == null) return;
+
         Timer timer = new Timer();
-        TimerTask job = getTimerTask();
+        TimerTask job = getTimerTask(task);
 
         timer.schedule(job, Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()));
     }
 
-    private TimerTask getTimerTask() {
+    private TimerTask getTimerTask(Task task) {
         return new TimerTask() {
             @Override
             public void run() {
@@ -396,6 +411,7 @@ public class OrganizerController implements Initializable {
                 playReminderJingle();
 
                 // todo: set off alert box with task info
+                Platform.runLater(() -> ReminderPopupController.display(task));
             }
         };
     }
@@ -510,6 +526,8 @@ public class OrganizerController implements Initializable {
 
         if (content == null || content.isBlank() || task == null) return;
 
+        taskDescriptionTextArea.setText(task.getDescription());
+
         getSelectedTask().setDescription(content);
         refreshTaskDetails();
     }
@@ -565,15 +583,15 @@ public class OrganizerController implements Initializable {
     }
 
     private TaskList getSelectedCategoryItem () {
-        return (TaskList) categoriesListView.getSelectionModel().getSelectedItem();
+        return categoriesListView.getSelectionModel().getSelectedItem();
     }
 
     private Task getSelectedTask () {
-        return (Task) activeTasksListView.getSelectionModel().getSelectedItem();
+        return activeTasksListView.getSelectionModel().getSelectedItem();
     }
 
     private Task getSelectedTaskFromCompletedTasksList () {
-        return (Task) completedTasksListView.getSelectionModel().getSelectedItem();
+        return completedTasksListView.getSelectionModel().getSelectedItem();
     }
 
     private void clearAddTaskTextFiled() {

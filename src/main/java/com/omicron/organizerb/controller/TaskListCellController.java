@@ -126,7 +126,7 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
             if (task == null) return;
             if (taskCheckBox.isSelected()) {
                 task.setDone(true);
-                organizerControllerReference.markTaskAsDoneEventHandler(null);
+                organizerControllerReference.markTaskAsDoneEventHandler();
             }
 
         });
