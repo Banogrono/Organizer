@@ -113,8 +113,9 @@ public class OrganizerController implements Initializable {
         initializeRepeatMenuButton();
         initializeRemindMeMenuButton();
         setIconsForButtons();
-
         loadBackgroundsFromDirectory();
+
+        disableTaskRelatedButtonsAndMenus(true);
 
 
     }
@@ -123,6 +124,7 @@ public class OrganizerController implements Initializable {
 
     @FXML
     public void loadTasksEventHandler() {
+        disableTaskRelatedButtonsAndMenus(true);
         refreshTaskList();
     }
 
@@ -138,6 +140,7 @@ public class OrganizerController implements Initializable {
 
     @FXML
     public void loadTaskDetailsEventHandler() {
+        disableButtonsIfSelectedTaskIsNull();
         refreshTaskDetails();
     }
 
@@ -602,6 +605,9 @@ public class OrganizerController implements Initializable {
         getSelectedCategoryItem().addTask(task);
     }
 
+    private void disableButtonsIfSelectedTaskIsNull() {
+        disableTaskRelatedButtonsAndMenus(getSelectedTask() == null);
+    }
 
     // -------------------------> test/ debug methods
 
