@@ -117,7 +117,12 @@ public class OrganizerController implements Initializable {
 
         disableTaskRelatedButtonsAndMenus(true);
 
-
+        // todo: check if that works and then move it into separate method
+        for (var cat : categoriesListView.getItems()) {
+            for (var task : cat.getTasks()) {
+                loadTaskIfRepeated(task);
+            }
+        }
     }
 
     // -------------------------> FXML methods
@@ -176,6 +181,17 @@ public class OrganizerController implements Initializable {
         repeatMenuButton.disableProperty().setValue(value);
         markAsDoneButton.disableProperty().setValue(value);
         addDueDatePicker.disableProperty().setValue(value);
+    }
+
+    private void loadTaskIfRepeated(Task task) {
+        if (task == null) return;
+        if (Objects.equals(task.getDayOfRepetition(), LocalDate.now())) {
+            completedTasksListView.getItems().remove(task);
+            completedTasksListView.refresh();
+
+            activeTasksListView.getItems().add(task);
+            activeTasksListView.refresh();
+        }
     }
 
     private void markTaskAsDoneAndAddToCompletedList() {
