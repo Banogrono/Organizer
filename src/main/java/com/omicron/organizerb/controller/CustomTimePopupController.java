@@ -9,15 +9,18 @@
 package com.omicron.organizerb.controller;
 
 import com.omicron.organizerb.model.Task;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -28,11 +31,32 @@ public class CustomTimePopupController {
     public static void display(Task task)
     {
         Stage popupWindow = new Stage();
+        int spacing = 8;
 
         popupWindow.initModality(Modality.APPLICATION_MODAL);
         popupWindow.setTitle("Time and Date");
+        popupWindow.initStyle(StageStyle.UNDECORATED);
 
-        VBox root = new VBox(4);
+        VBox root = new VBox(spacing);
+
+        final double[] xOffset = {0};
+        final double[] yOffset = {0};
+
+        root.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                xOffset[0] = event.getSceneX();
+                yOffset[0] = event.getSceneY();
+            }
+        });
+        root.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                popupWindow.setX(event.getScreenX() - xOffset[0]);
+                popupWindow.setY(event.getScreenY() - yOffset[0]);
+            }
+        });
+
         DatePicker datePicker = new DatePicker();
         datePicker.setValue(LocalDate.now());
         datePicker.setMaxWidth(Double.MAX_VALUE);
@@ -40,7 +64,7 @@ public class CustomTimePopupController {
         datePicker.setOnAction(e -> {
         });
 
-        HBox timeHBox = new HBox(4);
+        HBox timeHBox = new HBox(spacing);
 
         MenuButton hoursMenuButton = new MenuButton();
         MenuButton minutesMenuButton = new MenuButton();
@@ -83,18 +107,18 @@ public class CustomTimePopupController {
 
         otherButtonsHBox.getChildren().addAll(saveButton, cancelButton);
 
-        timeHBox.setSpacing(4);
+        timeHBox.setSpacing(spacing);
         timeHBox.setMaxWidth(Double.MAX_VALUE);
-        otherButtonsHBox.setSpacing(4);
+        otherButtonsHBox.setSpacing(spacing);
         otherButtonsHBox.setMaxWidth(Double.MAX_VALUE);
 
         root.getChildren().addAll(datePicker, timeHBox, otherButtonsHBox);
 
-        root.setSpacing(4);
-        root.paddingProperty().setValue(new Insets(4,4,4,4));
+        root.setSpacing(spacing);
+        root.paddingProperty().setValue(new Insets(spacing,spacing,spacing,spacing));
 
 
-        Scene scene1 = new Scene(root, 200, 90);
+        Scene scene1 = new Scene(root, spacing*28, spacing*14);
 
         popupWindow.setScene(scene1);
 
