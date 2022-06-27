@@ -14,13 +14,12 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
@@ -106,6 +105,7 @@ public class OrganizerController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         loadAndRefreshCategories();
+
         setCellFactoryForActiveAndCompletedTaskList(); // experimental do poprawy
 
         initializeCategoryContextMenu();
@@ -170,6 +170,11 @@ public class OrganizerController implements Initializable {
     @FXML
     public void markTaskAsDoneEventHandler() {
         markTaskAsDoneAndAddToCompletedList();
+    }
+
+    @FXML
+    public void saveAllEventHandler(MouseEvent mouseEvent) {
+        saveAllToDisk();
     }
 
     // -------------------------> internal methods
@@ -460,11 +465,11 @@ public class OrganizerController implements Initializable {
     }
 
     private void playReminderJingle() {
-       try {
-           playSound(getFile("src/main/resources/jingels/alarm.mp3"));
-       } catch (MalformedURLException e) {
-           throw new RuntimeException(e);
-       }
+        try {
+            playSound(getFile("src/main/resources/jingels/alarm.mp3"));
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void playDoneJingle() {
@@ -534,9 +539,25 @@ public class OrganizerController implements Initializable {
     }
 
     private void loadAndRefreshCategories() {
+        try {
+            loadDeserializedCategories();
+
+        } catch (Exception e) {
+            System.out.println(e);
+            loadSampleCategories();
+
+        } finally {
+            refreshCategories();
+        }
+    }
+
+    private void loadSampleCategories() {
         categories = new ArrayList<>();
         createAndLoadSampleData(); // todo get rid of that at some point
-        refreshCategories();
+    }
+
+    private void loadDeserializedCategories() {
+        categories = deserializeCategories();
     }
 
     private void updateTaskDescription() {
@@ -551,11 +572,11 @@ public class OrganizerController implements Initializable {
         refreshTaskDetails();
     }
 
-    private void refreshCategories () {
+    private void refreshCategories() {
         categoriesListView.setItems(FXCollections.observableArrayList(categories));
     }
 
-    private void refreshTaskList () {
+    private void refreshTaskList() {
         int selectedCategoryIndex = getSelectedCategoryIndex();
         if (selectedCategoryIndex < 0 || selectedCategoryIndex >= categories.size()) return;
 
@@ -565,14 +586,14 @@ public class OrganizerController implements Initializable {
         setContentOfCategoryLabel();
     }
 
-    private void refreshTaskDetails () {
+    private void refreshTaskDetails() {
         if (getSelectedTask() == null) return;
         setContentOfDescriptionTextAreaInTaskDetailsPane();
         setContentOfTaskTitleLabel();
         setContentOfDatePicker();
     }
 
-    private void setContentOfDatePicker(){
+    private void setContentOfDatePicker() {
         addDueDatePicker.setValue(getSelectedTask().getDate());
     }
 
@@ -597,19 +618,19 @@ public class OrganizerController implements Initializable {
 
     }
 
-    private int getSelectedCategoryIndex () {
+    private int getSelectedCategoryIndex() {
         return categoriesListView.getSelectionModel().getSelectedIndex();
     }
 
-    private TaskList getSelectedCategoryItem () {
+    private TaskList getSelectedCategoryItem() {
         return categoriesListView.getSelectionModel().getSelectedItem();
     }
 
-    private Task getSelectedTask () {
+    private Task getSelectedTask() {
         return activeTasksListView.getSelectionModel().getSelectedItem();
     }
 
-    private Task getSelectedTaskFromCompletedTasksList () {
+    private Task getSelectedTaskFromCompletedTasksList() {
         return completedTasksListView.getSelectionModel().getSelectedItem();
     }
 
@@ -623,6 +644,41 @@ public class OrganizerController implements Initializable {
 
     private void disableButtonsIfSelectedTaskIsNull() {
         disableTaskRelatedButtonsAndMenus(getSelectedTask() == null);
+    }
+
+    private void saveAllToDisk() {
+        serializeCategories();
+    }
+
+    private void serializeCategories() {
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream("src/main/resources/programData/data");
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+
+            objectOutputStream.writeObject(new ArrayList<>(categoriesListView.getItems()));
+
+            objectOutputStream.close();
+            fileOutputStream.close();
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private ArrayList<TaskList> deserializeCategories() {
+        try {
+            FileInputStream fileInputStream = new FileInputStream("src/main/resources/programData/data");
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+
+            ArrayList<TaskList> deserializedCategories = (ArrayList<TaskList>) objectInputStream.readObject();
+
+            objectInputStream.close();
+            fileInputStream.close();
+
+            return deserializedCategories;
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // -------------------------> test/ debug methods
@@ -647,14 +703,21 @@ public class OrganizerController implements Initializable {
         TaskList taskList2 = new TaskList("important");
         taskList2.addTask(taskB);
 
-        TaskList taskList3 = new TaskList("Planned");
+        TaskList taskList3 = new TaskList("planned");
         taskList3.addTask(taskC);
+
+        TaskList taskList4 = new TaskList("waiting");
+
+        TaskList taskList5 = new TaskList("ongoing");
 
         // add sample taskList objects to categories object
         categories.add(taskList1);
         categories.add(taskList2);
         categories.add(taskList3);
+        categories.add(taskList4);
+        categories.add(taskList5);
 
     }
+
 
 }

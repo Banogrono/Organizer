@@ -10,12 +10,13 @@ package com.omicron.organizerb.model;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
 @Data
-public class Task {
+public class Task implements Serializable {
 
     // ========================================================================================
     // Fields

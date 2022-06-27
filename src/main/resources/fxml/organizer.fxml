@@ -85,7 +85,7 @@
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
             </Label>
-            <TextArea fx:id="taskDescriptionTextArea" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseExited="#updateTaskDescriptionEventHandler" prefHeight="300.0" prefWidth="219.0" promptText="Task description">
+            <TextArea fx:id="taskDescriptionTextArea" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseExited="#updateTaskDescriptionEventHandler" prefHeight="300.0" prefWidth="219.0" promptText="Task description" wrapText="true">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" />
                </VBox.margin>
@@ -122,7 +122,7 @@
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>
                   </Button>
-                  <Button fx:id="saveButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="30.0" prefWidth="208.0" text="Save ">
+                  <Button fx:id="saveButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseReleased="#saveAllEventHandler" prefHeight="30.0" prefWidth="208.0" text="Save ">
                      <VBox.margin>
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>
