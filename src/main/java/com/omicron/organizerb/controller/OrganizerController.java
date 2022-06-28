@@ -1,5 +1,6 @@
 package com.omicron.organizerb.controller;
 
+import com.omicron.organizerb.Main;
 import com.omicron.organizerb.model.RepeatTask;
 import com.omicron.organizerb.model.Task;
 import com.omicron.organizerb.model.TaskList;
@@ -116,6 +117,8 @@ public class OrganizerController implements Initializable {
         loadBackgroundsFromDirectory();
 
         disableTaskRelatedButtonsAndMenus(true);
+
+        Main.stageRef.setOnCloseRequest(e -> onClose());
 
         // todo: check if that works and then move it into separate method
         for (var cat : categoriesListView.getItems()) {
@@ -339,10 +342,20 @@ public class OrganizerController implements Initializable {
 
     private void initializeCategoryContextMenu() {
 
+        MenuItem renameCategoryMenuItem = new MenuItem("Rename category");
+        renameCategoryMenuItem.setOnAction(event -> renameCategory());
+
         MenuItem deleteCategoryMenuItem = new MenuItem("Delete category");
         deleteCategoryMenuItem.setOnAction(event -> deleteCategory());
 
+        categoryContextMenu.getItems().add(renameCategoryMenuItem);
         categoryContextMenu.getItems().add(deleteCategoryMenuItem);
+    }
+
+    private void renameCategory() {
+        if (getSelectedCategoryItem() == null) return;
+        getSelectedCategoryItem().setTaskListTitle("next");
+        refreshCategories();
     }
 
     private void deleteCategory() {
@@ -558,6 +571,7 @@ public class OrganizerController implements Initializable {
 
     private void loadDeserializedCategories() {
         categories = deserializeCategories();
+        completedTasksListView.setItems(FXCollections.observableArrayList(deserializeCompletedTasks()));
     }
 
     private void updateTaskDescription() {
@@ -648,14 +662,50 @@ public class OrganizerController implements Initializable {
 
     private void saveAllToDisk() {
         serializeCategories();
+        serializeCompletedTasks();
     }
 
     private void serializeCategories() {
+        String path = "src/main/resources/programData/categories";
+        ArrayList<TaskList> categories = new ArrayList<>(categoriesListView.getItems());
+        serializeObject(categories, path);
+    }
+
+    private void serializeCompletedTasks() {
+        String path = "src/main/resources/programData/completed";
+        ArrayList<Task> completedTasks = new ArrayList<>(completedTasksListView.getItems());
+        serializeObject(completedTasks, path);
+    }
+
+    private ArrayList<TaskList> deserializeCategories() {
+        return (ArrayList<TaskList>) deserializeObject("src/main/resources/programData/categories");
+    }
+
+    private ArrayList<Task> deserializeCompletedTasks() {
+       return  (ArrayList<Task>) deserializeObject("src/main/resources/programData/completed");
+    }
+    private Object deserializeObject(String objectPath) {
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream("src/main/resources/programData/data");
+            FileInputStream fileInputStream = new FileInputStream(objectPath);
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+
+            Object deserializedObject = objectInputStream.readObject();
+
+            objectInputStream.close();
+            fileInputStream.close();
+
+            return deserializedObject;
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void serializeObject(Object toSerialize, String path) {
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(path);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
 
-            objectOutputStream.writeObject(new ArrayList<>(categoriesListView.getItems()));
+            objectOutputStream.writeObject(toSerialize);
 
             objectOutputStream.close();
             fileOutputStream.close();
@@ -665,20 +715,8 @@ public class OrganizerController implements Initializable {
         }
     }
 
-    private ArrayList<TaskList> deserializeCategories() {
-        try {
-            FileInputStream fileInputStream = new FileInputStream("src/main/resources/programData/data");
-            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-
-            ArrayList<TaskList> deserializedCategories = (ArrayList<TaskList>) objectInputStream.readObject();
-
-            objectInputStream.close();
-            fileInputStream.close();
-
-            return deserializedCategories;
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+    private void onClose() {
+        saveAllToDisk();
     }
 
     // -------------------------> test/ debug methods
