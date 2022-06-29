@@ -1,0 +1,90 @@
+
+
+* {
+    -fx-primary-color: #3684c0;
+    -fx-secondary-color: #124b91;
+    -fx-color-1: #c4c4c4;
+    -fx-color-2: #e3e3e3;
+    -fx-color-3: #171717;
+    -fx-color-4: #606165;
+    -fx-color-5: #171717;
+    -fx-color-6: #171717;
+    -fx-color-transparent: rgba(0, 0, 0, 0);
+    -fx-focus-color: -fx-secondary-color;
+    -fx-font-size: 1.2em;
+    -fx-text-fill: #000000;
+    -fx-shadow: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 5.0, 5.0);
+}
+
+
+/* ----------------------------------------------------------------------------------------------- */
+
+.list-view .list-cell {
+    -fx-padding: 8px;
+    -fx-border-insets: 2px;
+    -fx-background-insets: 2px;
+
+    -fx-background-radius: 2px;
+    -fx-border-radius: 2px;
+}
+
+/* Empty cells*/
+.list-view .list-cell:empty {
+    -fx-border-color:  -fx-color-transparent;
+    -fx-background-color:  -fx-color-transparent;
+}
+
+.list-view .list-cell:selected {
+    -fx-background-color: -fx-secondary-color;
+    -fx-text-fill: -fx-color-2;
+}
+
+.list-view .list-cell:filled:hover {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: -fx-color-2
+}
+
+.list-view .list-cell {
+    -fx-background-color: -fx-color-4;
+    -fx-text-fill: -fx-color-2;
+    -fx-border-color: -fx-color-transparent;
+    -fx-opacity: 0.9;
+
+}
+
+.list-view {
+    -fx-background-color: -fx-color-transparent;
+    -fx-text-fill: -fx-color-2;
+    -fx-border-color: -fx-color-transparent;
+
+}
+
+/* ----------------------------------------------------------------------------------------------- */
+
+.text-area {
+    -fx-border-style: none;
+    -fx-background-color: -fx-color-4;
+    -fx-text-fill: -fx-color-2;
+    -fx-background-radius: 3px;
+    -fx-border-radius: 3px;
+    -fx-effect: -fx-shadow;
+}
+
+.text-area .content {
+    -fx-background-color: -fx-color-4;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+
+}
+
+.text-area:focused .content {
+    -fx-background-color: -fx-color-4;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+}
+
+
+/* ----------------------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------------------- */

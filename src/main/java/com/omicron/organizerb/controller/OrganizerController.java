@@ -1,10 +1,7 @@
 package com.omicron.organizerb.controller;
 
 import com.omicron.organizerb.Main;
-import com.omicron.organizerb.model.RepeatTask;
-import com.omicron.organizerb.model.Task;
-import com.omicron.organizerb.model.TaskList;
-import com.omicron.organizerb.model.TaskPriority;
+import com.omicron.organizerb.model.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -95,6 +92,8 @@ public class OrganizerController implements Initializable {
 
     ArrayList<TaskList> categories;
 
+    ApplicationSettings applicationSettings;
+
     final int MAX_ICON_SIZE = 24;
 
 
@@ -105,20 +104,32 @@ public class OrganizerController implements Initializable {
     // -------------------------> Overridden methods
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        loadAndRefreshCategories();
 
-        setCellFactoryForActiveAndCompletedTaskList(); // experimental do poprawy
+        // todo: fix working path
+        System.out.println("Working Directory of the ja = " + System.getProperty("user.dir"));
+
+
+
+        loadAndRefreshCategories();
+        loadBackgroundsFromDirectory();
+        loadApplicationSettings();
+
+        setCellFactoryForActiveAndCompletedTaskList(); // todo: experimental feature
 
         initializeCategoryContextMenu();
         initializeTaskListContextMenu();
         initializeRepeatMenuButton();
         initializeRemindMeMenuButton();
         setIconsForButtons();
-        loadBackgroundsFromDirectory();
+
 
         disableTaskRelatedButtonsAndMenus(true);
 
-        Main.stageRef.setOnCloseRequest(e -> onClose());
+        Main.mainStageReference.setOnCloseRequest(e -> onClose());
+
+
+        loadAndSelectCategoryOnStartup();
+
 
         // todo: check if that works and then move it into separate method
         for (var cat : categoriesListView.getItems()) {
@@ -126,7 +137,16 @@ public class OrganizerController implements Initializable {
                 loadTaskIfRepeated(task);
             }
         }
+
+
     }
+
+    private void loadAndSelectCategoryOnStartup() {
+        categoriesListView.getSelectionModel().select(applicationSettings.getLastSelectedTaskListIndex());
+        activeTasksListView.getSelectionModel().select(0);
+        refreshTaskList();
+    }
+
 
     // -------------------------> FXML methods
 
@@ -176,11 +196,26 @@ public class OrganizerController implements Initializable {
     }
 
     @FXML
-    public void saveAllEventHandler(MouseEvent mouseEvent) {
+    public void saveAllEventHandler() {
         saveAllToDisk();
     }
 
     // -------------------------> internal methods
+
+    private void loadApplicationSettings() {
+        try {
+            applicationSettings = deserializeApplicationSettings();
+        } catch (Exception e) {
+            System.out.println("Settings file not found. " + e);
+            applicationSettings = new ApplicationSettings();
+
+        }
+
+        if (applicationSettings.getBackground() != null)
+            setBackground("src/main/resources/backgrounds/", applicationSettings.getBackground());
+
+    }
+
 
     private void disableTaskRelatedButtonsAndMenus(boolean value) {
         deleteButton.disableProperty().setValue(value);
@@ -518,6 +553,7 @@ public class OrganizerController implements Initializable {
 
     private void loadBackgroundsFromDirectory() {
 
+        // todo: refactor that
         // get all backgrounds from background folder
         String pathToBGFolder = "src/main/resources/backgrounds/";
         String[] backgrounds = getListOfAvailableBackgrounds(pathToBGFolder);
@@ -534,6 +570,9 @@ public class OrganizerController implements Initializable {
 
     private void setBackground(String pathToBGFolder, String image) {
         try {
+            if (applicationSettings != null)
+                applicationSettings.setBackground(image);
+
             Background background = createBackgroundForHBox(new Image(new FileInputStream(pathToBGFolder + image)));
             backgroundHBox.setBackground(background);
         } catch (FileNotFoundException e) {
@@ -637,6 +676,7 @@ public class OrganizerController implements Initializable {
     }
 
     private TaskList getSelectedCategoryItem() {
+        applicationSettings.setLastSelectedTaskListIndex(categoriesListView.getSelectionModel().getSelectedIndex());
         return categoriesListView.getSelectionModel().getSelectedItem();
     }
 
@@ -663,6 +703,7 @@ public class OrganizerController implements Initializable {
     private void saveAllToDisk() {
         serializeCategories();
         serializeCompletedTasks();
+        serializeApplicationSettings();
     }
 
     private void serializeCategories() {
@@ -675,6 +716,15 @@ public class OrganizerController implements Initializable {
         String path = "src/main/resources/programData/completed";
         ArrayList<Task> completedTasks = new ArrayList<>(completedTasksListView.getItems());
         serializeObject(completedTasks, path);
+    }
+
+    private void serializeApplicationSettings() {
+        String path = "src/main/resources/programData/settings";
+        serializeObject(this.applicationSettings, path);
+    }
+
+    private ApplicationSettings deserializeApplicationSettings() {
+        return (ApplicationSettings) deserializeObject("src/main/resources/programData/settings");
     }
 
     private ArrayList<TaskList> deserializeCategories() {

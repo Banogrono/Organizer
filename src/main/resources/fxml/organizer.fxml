@@ -13,16 +13,16 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<HBox fx:id="backgroundHBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.omicron.organizerb.controller.OrganizerController">
+<HBox fx:id="backgroundHBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" stylesheets="@../css/organizer.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.omicron.organizerb.controller.OrganizerController">
    <children>
-      <VBox prefHeight="600.0" prefWidth="602.0">
+      <VBox prefHeight="600.0" prefWidth="602.0" stylesheets="@../css/organizer.css">
          <children>
-            <Label prefHeight="18.0" prefWidth="250.0" text="Categories">
+            <Label prefHeight="18.0" prefWidth="250.0" stylesheets="@../css/organizer.css" text="Categories">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
             </Label>
-            <ListView fx:id="categoriesListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseReleased="#loadTasksEventHandler">
+            <ListView fx:id="categoriesListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseReleased="#loadTasksEventHandler" stylesheets="@../css/organizer.css">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
@@ -30,23 +30,23 @@
                   <ContextMenu fx:id="categoryContextMenu" />
                </contextMenu>
             </ListView>
-            <VBox prefHeight="200.0" prefWidth="100.0">
+            <VBox prefHeight="200.0" prefWidth="100.0" stylesheets="@../css/organizer.css">
                <children>
-                  <TextField fx:id="addCategoryTextField" maxWidth="1.7976931348623157E308" onKeyReleased="#addCategoryEventHandler" promptText="Add category...">
+                  <TextField fx:id="addCategoryTextField" maxWidth="1.7976931348623157E308" onKeyReleased="#addCategoryEventHandler" promptText="Add category..." stylesheets="@../css/organizer.css">
                      <VBox.margin>
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>
                   </TextField>
                </children>
             </VBox>
-            <MenuButton fx:id="backgroundMenuButton" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0">
+            <MenuButton fx:id="backgroundMenuButton" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" stylesheets="@../css/organizer.css">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
             </MenuButton>
          </children>
       </VBox>
-      <VBox prefHeight="600.0" prefWidth="827.0">
+      <VBox prefHeight="600.0" prefWidth="827.0" stylesheets="@../css/organizer.css">
          <children>
             <Label fx:id="taskListLabel" prefHeight="45.0" prefWidth="463.0" text="Task list title">
                <VBox.margin>
@@ -78,7 +78,7 @@
             </TextField>
          </children>
       </VBox>
-      <VBox prefHeight="600.0" prefWidth="563.0">
+      <VBox prefHeight="600.0" prefWidth="563.0" stylesheets="@../css/organizer.css">
          <children>
             <Label fx:id="taskTitleLabel" prefHeight="21.0" text="task  title...">
                <VBox.margin>

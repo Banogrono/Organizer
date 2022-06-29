@@ -12,7 +12,7 @@ import java.net.URL;
 
 public class Main extends Application {
 
-    public static Stage stageRef;
+    public static Stage mainStageReference;
 
     public static void main(String[] args) {
         launch();
@@ -21,7 +21,7 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws IOException {
 
-        stageRef = stage;
+        mainStageReference = stage;
 
         URL appIcon = new File("src/main/resources/icons/organizer.png").toURI().toURL();
         var sceneFxml = new File("src/main/resources/fxml/organizer.fxml").toURI().toURL();
