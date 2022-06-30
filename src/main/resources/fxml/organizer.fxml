@@ -12,46 +12,59 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<HBox fx:id="backgroundHBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" stylesheets="@../css/organizer.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.omicron.organizerb.controller.OrganizerController">
+<HBox fx:id="backgroundHBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1100.0" stylesheets="@../css/organizer.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.omicron.organizerb.controller.OrganizerController">
    <children>
-      <VBox prefHeight="600.0" prefWidth="602.0" stylesheets="@../css/organizer.css">
+      <VBox fx:id="catPane" prefHeight="600.0" prefWidth="602.0" stylesheets="@../css/organizer.css">
          <children>
             <Label prefHeight="18.0" prefWidth="250.0" stylesheets="@../css/organizer.css" text="Categories">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
+               <font>
+                  <Font name="Century Gothic Bold" size="12.0" />
+               </font>
             </Label>
-            <ListView fx:id="categoriesListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseReleased="#loadTasksEventHandler" stylesheets="@../css/organizer.css">
+            <ListView fx:id="categoriesListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseReleased="#loadTasksEventHandler" prefHeight="618.0" prefWidth="227.0" stylesheets="@../css/organizer.css">
                <VBox.margin>
-                  <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                  <Insets right="4.0" />
                </VBox.margin>
                <contextMenu>
                   <ContextMenu fx:id="categoryContextMenu" />
                </contextMenu>
             </ListView>
-            <VBox prefHeight="200.0" prefWidth="100.0" stylesheets="@../css/organizer.css">
-               <children>
-                  <TextField fx:id="addCategoryTextField" maxWidth="1.7976931348623157E308" onKeyReleased="#addCategoryEventHandler" promptText="Add category..." stylesheets="@../css/organizer.css">
-                     <VBox.margin>
-                        <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
-                     </VBox.margin>
-                  </TextField>
-               </children>
-            </VBox>
-            <MenuButton fx:id="backgroundMenuButton" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" stylesheets="@../css/organizer.css">
+            <Separator prefHeight="11.0" prefWidth="235.0">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
-            </MenuButton>
+               <padding>
+                  <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+               </padding>
+            </Separator>
+            <HBox spacing="8.0">
+               <VBox.margin>
+                  <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+               </VBox.margin>
+               <children>
+                  <TextField fx:id="addCategoryTextField" maxWidth="1.7976931348623157E308" onKeyReleased="#addCategoryEventHandler" prefHeight="35.0" prefWidth="169.0" promptText="+ Add a category" stylesheets="@../css/organizer.css" />
+                  <MenuButton fx:id="backgroundMenuButton" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" stylesheets="@../css/organizer.css" />
+               </children>
+               <padding>
+                  <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+               </padding>
+            </HBox>
          </children>
       </VBox>
-      <VBox prefHeight="600.0" prefWidth="827.0" stylesheets="@../css/organizer.css">
+      <VBox prefHeight="600.0" prefWidth="950.0" stylesheets="@../css/organizer.css">
          <children>
-            <Label fx:id="taskListLabel" prefHeight="45.0" prefWidth="463.0" text="Task list title">
+            <Label fx:id="taskListLabel" prefHeight="45.0" prefWidth="463.0" text=" " wrapText="true">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
+               <font>
+                  <Font name="Century Gothic Bold" size="22.0" />
+               </font>
             </Label>
             <ListView fx:id="activeTasksListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseReleased="#loadTaskDetailsEventHandler">
                <VBox.margin>
@@ -65,25 +78,34 @@
                <VBox.margin>
                   <Insets left="4.0" />
                </VBox.margin>
+               <font>
+                  <Font name="Century Gothic Bold" size="12.0" />
+               </font>
             </Label>
             <ListView fx:id="completedTasksListView" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" prefHeight="300.0">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
             </ListView>
-            <TextField fx:id="addTaskTextField" onKeyReleased="#addTaskEventHandler" promptText="Add task...">
+            <TextField fx:id="addTaskTextField" onKeyReleased="#addTaskEventHandler" promptText="+ Add a task">
                <VBox.margin>
-                  <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                  <Insets bottom="12.0" left="8.0" right="16.0" top="4.0" />
                </VBox.margin>
             </TextField>
          </children>
+         <padding>
+            <Insets left="16.0" right="16.0" />
+         </padding>
       </VBox>
-      <VBox prefHeight="600.0" prefWidth="563.0" stylesheets="@../css/organizer.css">
+      <VBox fx:id="detailsPane" prefHeight="600.0" prefWidth="600.0" stylesheets="@../css/organizer.css">
          <children>
-            <Label fx:id="taskTitleLabel" prefHeight="21.0" text="task  title...">
+            <Label fx:id="taskTitleLabel" prefHeight="21.0" text=" " wrapText="true">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
+               <font>
+                  <Font name="Century Gothic Bold" size="20.0" />
+               </font>
             </Label>
             <TextArea fx:id="taskDescriptionTextArea" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseExited="#updateTaskDescriptionEventHandler" prefHeight="300.0" prefWidth="219.0" promptText="Task description" wrapText="true">
                <VBox.margin>
@@ -97,6 +119,11 @@
             </Separator>
             <VBox prefHeight="235.0" prefWidth="199.0">
                <children>
+                  <DatePicker fx:id="addDueDatePicker" maxWidth="1.7976931348623157E308" onAction="#addTaskDueDateEventHandler" promptText="Add due date">
+                     <VBox.margin>
+                        <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                     </VBox.margin>
+                  </DatePicker>
                   <MenuButton fx:id="remindMeMenuButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Remind me">
                      <VBox.margin>
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
@@ -107,11 +134,6 @@
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>
                   </MenuButton>
-                  <DatePicker fx:id="addDueDatePicker" maxWidth="1.7976931348623157E308" onAction="#addTaskDueDateEventHandler" promptText="Add due date">
-                     <VBox.margin>
-                        <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
-                     </VBox.margin>
-                  </DatePicker>
                   <Separator maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
                      <VBox.margin>
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
@@ -135,9 +157,12 @@
                </children>
             </VBox>
          </children>
+         <HBox.margin>
+            <Insets left="4.0" />
+         </HBox.margin>
+         <padding>
+            <Insets left="4.0" right="4.0" />
+         </padding>
       </VBox>
    </children>
-   <padding>
-      <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
-   </padding>
 </HBox>

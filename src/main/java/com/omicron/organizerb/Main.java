@@ -27,7 +27,7 @@ public class Main extends Application {
         var sceneFxml = new File("src/main/resources/fxml/organizer.fxml").toURI().toURL();
 
         FXMLLoader fxmlLoader = new FXMLLoader(sceneFxml);
-        Scene scene = new Scene(fxmlLoader.load(), 900, 600);
+        Scene scene = new Scene(fxmlLoader.load(), 1100, 600);
 
         stage.setTitle("Organizer");
         stage.setScene(scene);
