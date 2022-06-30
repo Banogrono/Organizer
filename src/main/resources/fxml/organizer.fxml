@@ -10,15 +10,16 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox fx:id="backgroundHBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1100.0" stylesheets="@../css/organizer.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.omicron.organizerb.controller.OrganizerController">
+<HBox fx:id="backgroundHBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1100.0" stylesheets="@../css/organizerDark.css" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.omicron.organizerb.controller.OrganizerController">
    <children>
-      <VBox fx:id="catPane" prefHeight="600.0" prefWidth="602.0" stylesheets="@../css/organizer.css">
+      <VBox fx:id="catPane" prefHeight="600.0" prefWidth="602.0" HBox.hgrow="ALWAYS">
          <children>
-            <Label prefHeight="18.0" prefWidth="250.0" stylesheets="@../css/organizer.css" text="Categories">
+            <Label focusTraversable="false" prefHeight="18.0" prefWidth="250.0" text="Categories">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
@@ -26,7 +27,7 @@
                   <Font name="Century Gothic Bold" size="12.0" />
                </font>
             </Label>
-            <ListView fx:id="categoriesListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseReleased="#loadTasksEventHandler" prefHeight="618.0" prefWidth="227.0" stylesheets="@../css/organizer.css">
+            <ListView fx:id="categoriesListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseReleased="#loadTasksEventHandler" prefHeight="618.0" prefWidth="227.0">
                <VBox.margin>
                   <Insets right="4.0" />
                </VBox.margin>
@@ -34,7 +35,7 @@
                   <ContextMenu fx:id="categoryContextMenu" />
                </contextMenu>
             </ListView>
-            <Separator prefHeight="11.0" prefWidth="235.0">
+            <Separator focusTraversable="false" prefHeight="11.0" prefWidth="235.0" VBox.vgrow="ALWAYS">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
@@ -42,23 +43,12 @@
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </padding>
             </Separator>
-            <HBox spacing="8.0">
-               <VBox.margin>
-                  <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
-               </VBox.margin>
-               <children>
-                  <TextField fx:id="addCategoryTextField" maxWidth="1.7976931348623157E308" onKeyReleased="#addCategoryEventHandler" prefHeight="35.0" prefWidth="169.0" promptText="+ Add a category" stylesheets="@../css/organizer.css" />
-                  <MenuButton fx:id="backgroundMenuButton" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" stylesheets="@../css/organizer.css" />
-               </children>
-               <padding>
-                  <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
-               </padding>
-            </HBox>
+            <TextField fx:id="addCategoryTextField" maxWidth="1.7976931348623157E308" onKeyReleased="#addCategoryEventHandler" prefHeight="35.0" prefWidth="169.0" promptText="+ Add a category" />
          </children>
       </VBox>
-      <VBox prefHeight="600.0" prefWidth="950.0" stylesheets="@../css/organizer.css">
+      <VBox prefHeight="600.0" prefWidth="950.0">
          <children>
-            <Label fx:id="taskListLabel" prefHeight="45.0" prefWidth="463.0" text=" " wrapText="true">
+            <Label fx:id="taskListLabel" focusTraversable="false" prefHeight="45.0" prefWidth="463.0" text=" " wrapText="true">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
@@ -74,7 +64,7 @@
                   <ContextMenu fx:id="taskListContextMenu" />
                </contextMenu>
             </ListView>
-            <Label text="Completed tasks">
+            <Label focusTraversable="false" text="Completed tasks">
                <VBox.margin>
                   <Insets left="4.0" />
                </VBox.margin>
@@ -97,9 +87,9 @@
             <Insets left="16.0" right="16.0" />
          </padding>
       </VBox>
-      <VBox fx:id="detailsPane" prefHeight="600.0" prefWidth="600.0" stylesheets="@../css/organizer.css">
+      <VBox fx:id="detailsPane" prefHeight="600.0" prefWidth="600.0">
          <children>
-            <Label fx:id="taskTitleLabel" prefHeight="21.0" text=" " wrapText="true">
+            <Label fx:id="taskTitleLabel" focusTraversable="false" prefHeight="21.0" text=" " wrapText="true">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
@@ -112,7 +102,7 @@
                   <Insets bottom="4.0" left="4.0" right="4.0" />
                </VBox.margin>
             </TextArea>
-            <Separator prefWidth="200.0">
+            <Separator focusTraversable="false" prefWidth="200.0">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
@@ -134,7 +124,7 @@
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>
                   </MenuButton>
-                  <Separator maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+                  <Separator focusTraversable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
                      <VBox.margin>
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>
@@ -156,6 +146,20 @@
                   </Button>
                </children>
             </VBox>
+            <Separator maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" opacity="0.0" visible="false" VBox.vgrow="ALWAYS">
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+            </Separator>
+            <HBox alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="36.0">
+               <children>
+                  <MenuButton fx:id="backgroundMenuButton" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" />
+                  <ToggleButton fx:id="themeToggleButton" mnemonicParsing="false" onAction="#switchThemeEventHandler" />
+               </children>
+               <padding>
+                  <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+               </padding>
+            </HBox>
          </children>
          <HBox.margin>
             <Insets left="4.0" />

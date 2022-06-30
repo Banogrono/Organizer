@@ -8,6 +8,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 public class Main extends Application {
@@ -23,18 +24,26 @@ public class Main extends Application {
 
         mainStageReference = stage;
 
-        URL appIcon = new File("src/main/resources/icons/organizer.png").toURI().toURL();
-        var sceneFxml = new File("src/main/resources/fxml/organizer.fxml").toURI().toURL();
-
-        FXMLLoader fxmlLoader = new FXMLLoader(sceneFxml);
-        Scene scene = new Scene(fxmlLoader.load(), 1100, 600);
+        Scene scene = getMainScene();
 
         stage.setTitle("Organizer");
         stage.setScene(scene);
-        stage.getIcons().add(new Image(appIcon.toString()));
+        setApplicationIcon(stage);
 
         stage.show();
 
+    }
+
+    private Scene getMainScene() throws IOException {
+        var sceneFxml = new File("src/main/resources/fxml/organizer.fxml").toURI().toURL();
+
+        FXMLLoader fxmlLoader = new FXMLLoader(sceneFxml);
+        return new Scene(fxmlLoader.load(), 1100, 600);
+    }
+
+    private void setApplicationIcon(Stage stage) throws MalformedURLException {
+        URL appIcon = new File("src/main/resources/icons/organizer.png").toURI().toURL();
+        stage.getIcons().add(new Image(appIcon.toString()));
     }
 
 }

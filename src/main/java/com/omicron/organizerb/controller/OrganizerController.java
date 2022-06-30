@@ -4,6 +4,7 @@ import com.omicron.organizerb.Main;
 import com.omicron.organizerb.model.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -87,6 +88,9 @@ public class OrganizerController implements Initializable {
     @FXML
     public TextField addCategoryTextField;
 
+    @FXML
+    public ToggleButton themeToggleButton;
+
 
     // -------------------------> private fields
 
@@ -107,8 +111,6 @@ public class OrganizerController implements Initializable {
 
         // todo: fix working path
         System.out.println("Working Directory of the ja = " + System.getProperty("user.dir"));
-
-
 
         loadAndRefreshCategories();
         loadBackgroundsFromDirectory();
@@ -197,10 +199,43 @@ public class OrganizerController implements Initializable {
 
     @FXML
     public void saveAllEventHandler() {
-        saveAllToDisk();
+
+        // saveAllToDisk();
+    }
+
+    @FXML
+    public void switchThemeEventHandler(ActionEvent event) {
+        try {
+            if (themeToggleButton.isSelected()) {
+                loadApplicationTheme("/css/organizerLight.css");
+                applicationSettings.setApplicationThemeCSS("/css/organizerLight.css");
+                return;
+            }
+
+            loadApplicationTheme("/css/organizerDark.css");
+            applicationSettings.setApplicationThemeCSS("/css/organizerDark.css");
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 
     // -------------------------> internal methods
+
+    private void loadApplicationTheme(String path) {
+        try {
+            String theme = Objects.requireNonNull(getClass().getResource(path)).toExternalForm();
+            backgroundHBox.getStylesheets().remove(0);
+            backgroundHBox.getStylesheets().add(theme);
+
+
+            if (backgroundHBox.getStylesheets().get(0).contains("Light"))
+                themeToggleButton.setGraphic(getIcon("src/main/resources/icons/light_off.png"));
+            else
+                themeToggleButton.setGraphic(getIcon("src/main/resources/icons/light_on.png"));
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
 
     private void loadApplicationSettings() {
         try {
@@ -213,6 +248,8 @@ public class OrganizerController implements Initializable {
 
         if (applicationSettings.getBackground() != null)
             setBackground("src/main/resources/backgrounds/", applicationSettings.getBackground());
+
+        loadApplicationTheme(applicationSettings.getApplicationThemeCSS());
 
     }
 
@@ -806,6 +843,7 @@ public class OrganizerController implements Initializable {
         categories.add(taskList5);
 
     }
+
 
 
 }

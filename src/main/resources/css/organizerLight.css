@@ -1,0 +1,413 @@
+
+/*Base Jfx style: https://hg.openjdk.java.net/openjfx/8/master/rt/file/f89b7dc932af/modules/controls/src/main/resources/com/sun/javafx/scene/control/skin/modena/modena.css*/
+
+/* ----------------------------------------------------------------------------------------------- */
+/*                                          COLORS                                                 */
+/* ----------------------------------------------------------------------------------------------- */
+
+* {
+    -fx-primary-color: #83d5fc;
+    -fx-secondary-color: #46b7ff;
+    -fx-color-1: #de9f1d;
+    /*text*/
+    -fx-color-2: #131313;
+    /*scroll bar*/
+    -fx-color-3: #a9a9a9;
+    /* List, cells and text fields backgrounds*/
+    -fx-color-4: #ffffff;
+    /* selection*/
+    -fx-color-5: #dadada;
+    /* Side panes*/
+    -fx-color-6: rgba(229, 229, 229, 0.95);
+    -fx-color-transparent: rgba(0, 0, 0, 0);
+    -fx-focus-color: -fx-secondary-color;
+    -fx-font-size: 1.2em;
+    -fx-text-fill: #000000;
+    -fx-shadow: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 5.0, 5.0);
+}
+
+/* ----------------------------------------------------------------------------------------------- */
+/*                                    CUSTOM NODES WITH ID                                         */
+/* ----------------------------------------------------------------------------------------------- */
+
+#catPane {
+    -fx-background-color: -fx-color-6;
+
+}
+
+#detailsPane {
+    -fx-background-color: -fx-color-6;
+
+}
+
+#backgroundMenuButton {
+    -fx-background-color: -fx-color-6;
+}
+
+#backgroundMenuButton .label {
+    -fx-background-color: -fx-color-6;
+}
+
+#addTaskTextField {
+    -fx-padding: 16px;
+}
+
+/* ----------------------------------------------------------------------------------------------- */
+/*                                          LABELS                                                 */
+/* ----------------------------------------------------------------------------------------------- */
+
+.label {
+    -fx-text-fill: -fx-color-2;
+}
+
+/* ----------------------------------------------------------------------------------------------- */
+/*                                     LIST VIEW & LIST CELL                                       */
+/* ----------------------------------------------------------------------------------------------- */
+
+.list-view .list-cell {
+    -fx-padding: 4px;
+    -fx-border-insets: 2px;
+    -fx-background-insets: 2px;
+
+    -fx-background-radius: 2px;
+    -fx-border-radius: 2px;
+}
+
+/* Empty cells*/
+.list-view .list-cell:empty {
+    -fx-border-color:  -fx-color-transparent;
+    -fx-background-color:  -fx-color-transparent;
+}
+
+.list-view .list-cell:selected {
+    -fx-background-color: -fx-secondary-color;
+    -fx-text-fill: -fx-color-2;
+}
+
+.list-view .list-cell:filled:hover {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: -fx-color-2
+}
+
+.list-view .list-cell {
+    -fx-background-color: -fx-color-4;
+    -fx-text-fill: -fx-color-2;
+    -fx-border-color: -fx-color-transparent;
+    -fx-opacity: 0.9;
+
+}
+
+.list-view {
+    -fx-background-color: -fx-color-transparent;
+    -fx-text-fill: -fx-color-2;
+    -fx-border-color: -fx-color-transparent;
+
+}
+/* ----------------------------------------------------------------------------------------------- */
+/*                                          CHECK BOXES                                            */
+/* ----------------------------------------------------------------------------------------------- */
+
+.check-box {
+    -fx-text-fill: -fx-color-2;
+}
+
+.check-box .mark {
+    -fx-shape: "M1.73,12.91 8.1,19.28 22.79,4.59 22.79,1.59 8.1,16.28 1.73,9.91";
+}
+
+.check-box .box {
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: -fx-color-2;
+    -fx-background-color: -fx-color-transparent;
+
+}
+
+
+/* ----------------------------------------------------------------------------------------------- */
+/*                                          TEXT AREA                                              */
+/* ----------------------------------------------------------------------------------------------- */
+
+.text-area {
+    -fx-border-style: none;
+    -fx-background-color: -fx-color-4;
+    -fx-text-fill: -fx-color-2;
+    -fx-background-radius: 3px;
+    -fx-border-radius: 3px;
+}
+
+.text-area .content {
+    -fx-background-color: -fx-color-4;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+
+}
+
+.text-area:focused .content {
+    -fx-background-color: -fx-color-4;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+}
+
+/* ----------------------------------------------------------------------------------------------- */
+/*                                          TEXT FIELDS                                            */
+/* ----------------------------------------------------------------------------------------------- */
+
+.text-field {
+    -fx-background-color: -fx-color-6;
+    -fx-text-fill: -fx-color-2;
+    -fx-opacity: 1;
+
+}
+
+.text-field .content{
+    -fx-background-color: -fx-color-6;
+    -fx-text-fill: -fx-color-2;
+    -fx-opacity: 1;
+
+}
+
+/* ----------------------------------------------------------------------------------------------- */
+/*                                          BUTTONS                                                */
+/* ----------------------------------------------------------------------------------------------- */
+
+.button {
+    -fx-background-color: -fx-color-4;
+    -fx-text-fill: -fx-color-2;
+}
+.button:hover {
+    -fx-background-color: -fx-color-5;
+}
+
+.menu-button {
+    -fx-background-color: -fx-color-4;
+    -fx-text-fill: -fx-color-2;
+}
+
+.menu-button:hover {
+    -fx-background-color: -fx-color-5;
+}
+
+
+.menu-button .label{
+    -fx-background-color: -fx-color-4;
+    -fx-text-fill: -fx-color-2;
+}
+
+/* ----------------------------------------------------------------------------------------------- */
+/*                                         CONTEXT MENU                                            */
+/* ----------------------------------------------------------------------------------------------- */
+
+.context-menu {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-color-2;
+    -fx-border-width: 1px;
+    -fx-border-color: -fx-primary-color;
+}
+
+/* ----------------------------------------------------------------------------------------------- */
+/*                                          MENU ITEMS                                             */
+/* ----------------------------------------------------------------------------------------------- */
+
+.menu-item {
+    -fx-background-color: -fx-color-6;
+    -fx-text-fill: -fx-color-2;
+
+}
+
+.menu-item:hover  {
+    -fx-background-color: -fx-color-5;
+    -fx-text-fill: -fx-color-2;
+}
+
+.menu-item .label {
+    -fx-text-fill: -fx-color-2;
+}
+
+.menu-item:hover .label {
+    -fx-background-color: -fx-color-5;
+    -fx-text-fill: -fx-color-2;
+}
+
+
+/* ----------------------------------------------------------------------------------------------- */
+/*                                          SEPARATORS                                             */
+/* ----------------------------------------------------------------------------------------------- */
+
+.separator {
+    -fx-border-style: none;
+    -fx-background-color: -fx-color-6;
+}
+
+.separator .line{
+    -fx-border-color: -fx-color-5;
+}
+
+/* ----------------------------------------------------------------------------------------------- */
+/*                                          SCROLL BAR                                             */
+/* ----------------------------------------------------------------------------------------------- */
+
+.scroll-bar{
+    -fx-background-color :transparent;
+    -fx-border-color :transparent;
+    -fx-background-radius : 0.0em;
+    -fx-border-radius :0.6em;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color :transparent;
+    -fx-background-radius : 0.0em;
+    -fx-padding :0.0 4.0 0.0 0.0;
+}
+
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow{
+    -fx-shape : " ";
+    -fx-padding :0.0 0.15em;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color : -fx-color-3;
+    -fx-background-insets : 1.5, 0.0, 0.0;
+    -fx-background-radius : 1.5em;
+}
+
+
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color : -fx-color-4;
+    -fx-background-insets : 1.5, 0.0, 0.0;
+    -fx-background-radius : 1.5em;
+}
+
+/* ----------------------------------------------------------------------------------------------- */
+/*                                          DATE PICKER                                            */
+/* ----------------------------------------------------------------------------------------------- */
+/*  Partially stolen from here: https://genuinecoder.com/javafx-datepicker-tutorial-with-date-formatting-and-css-styling/*/
+
+.date-picker {
+    -fx-background-color: transparent;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+}
+
+.date-picker .arrow-button {
+    -fx-background-color: -fx-primary-color;
+    -fx-background-radius: 0;
+}
+
+.date-picker .arrow-button:hover {
+    -fx-background-color: -fx-secondary-color;
+}
+
+.date-picker .arrow-button .arrow {
+    -fx-background-color: -fx-color-2;
+}
+
+/*-----------------------------------------
+Customize popup content
+-------------------------------------------*/
+.date-picker .cell {
+    -fx-background-color: -fx-color-2;
+}
+
+.date-picker .cell:hover {
+    -fx-background-color: -fx-primary-color;
+}
+
+.date-picker .cell:focused {
+    -fx-background-color: -fx-primary-color;
+}
+
+
+.date-picker-popup {
+    -fx-background-color: -fx-primary-color;
+    -fx-border-color: transparent;
+}
+
+.date-picker-popup .month-year-pane {
+    -fx-background-color: -fx-color-5;
+}
+
+.date-picker-popup .month-year-pane .label {
+    -fx-text-fill: -fx-color-2;
+}
+
+.date-picker-popup .week-number-cell {
+    -fx-text-fill: -fx-color-2;
+}
+
+
+.date-picker-popup .day-number-cell {
+    -fx-background-color: -fx-color-5;
+    -fx-text-fill: -fx-color-2;
+}
+
+.date-picker-popup > .calendar-grid {
+
+    -fx-background-color: -fx-color-5;
+    -fx-text-fill: -fx-color-2;
+
+}
+
+.date-picker-popup > * > .date-cell {
+
+    -fx-background-color: -fx-color-5;
+
+    -fx-text-fill: -fx-color-2;
+
+    -fx-background-insets: 1, 2;
+
+    -fx-padding: 0;
+
+    -fx-alignment: BASELINE_CENTER;
+
+    -fx-opacity: 1.0;
+
+    -fx-border-color: -fx-color-5;
+
+    -fx-border-width: 1px;
+
+}
+
+.date-picker-popup > * > .week-number-cell {
+
+    -fx-padding: 0.333333em 0.583333em 0.333333em 0.583333em; /* 4 7 4 7 */
+
+    -fx-border-color: -fx-color-5;
+
+    -fx-border-width: 1px;
+
+    -fx-background-color: -fx-color-5;
+
+    -fx-text-fill: -fx-color-2;
+
+}
+
+
+/*-----------------------------------------
+Customize the selected cell
+-------------------------------------------*/
+.date-picker .selected {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: -fx-color-2;
+}
+
+.date-picker .selected:focused {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: -fx-color-2;
+}
+
+
+/*-----------------------------------------
+Customize left and right arrow
+-------------------------------------------*/
+.date-picker-popup .spinner .button .left-arrow,
+.date-picker-popup .spinner .button .right-arrow {
+    -fx-background-color: -fx-primary-color;
+}
+
+
+/* ----------------------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------------------- */

@@ -21,6 +21,8 @@ public class ApplicationSettings implements Serializable {
 
     private String background;
 
+    private String applicationThemeCSS;
+
     private int lastSelectedTaskListIndex = 0;
 
     // ========================================================================================
