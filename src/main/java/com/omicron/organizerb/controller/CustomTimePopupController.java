@@ -9,12 +9,13 @@
 package com.omicron.organizerb.controller;
 
 import com.omicron.organizerb.model.Task;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.control.Button;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -26,6 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 // TODO: REFACTOR ALL OF THAT
+// todo: support for cusotm css
 public class CustomTimePopupController {
 
     public static void display(Task task)
@@ -42,19 +44,13 @@ public class CustomTimePopupController {
         final double[] xOffset = {0};
         final double[] yOffset = {0};
 
-        root.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                xOffset[0] = event.getSceneX();
-                yOffset[0] = event.getSceneY();
-            }
+        root.setOnMousePressed(event -> {
+            xOffset[0] = event.getSceneX();
+            yOffset[0] = event.getSceneY();
         });
-        root.setOnMouseDragged(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                popupWindow.setX(event.getScreenX() - xOffset[0]);
-                popupWindow.setY(event.getScreenY() - yOffset[0]);
-            }
+        root.setOnMouseDragged(event -> {
+            popupWindow.setX(event.getScreenX() - xOffset[0]);
+            popupWindow.setY(event.getScreenY() - yOffset[0]);
         });
 
         DatePicker datePicker = new DatePicker();
@@ -130,9 +126,7 @@ public class CustomTimePopupController {
         for (int i = 0; i < 24; i++) {
             var h = i;
             MenuItem hour = new MenuItem("" + h);
-            hour.setOnAction(e -> {
-                hourMenuButton.textProperty().setValue("" + h);
-            });
+            hour.setOnAction(e -> hourMenuButton.textProperty().setValue("" + h));
 
             hourMenuButton.getItems().add(hour);
             hourMenuButton.setMaxWidth(Double.MAX_VALUE);
@@ -144,9 +138,7 @@ public class CustomTimePopupController {
         for (int i = 0; i < 60; i++) {
             var m = i;
             MenuItem minute = new MenuItem("" + m);
-            minute.setOnAction(e -> {
-                minuteMenuButton.textProperty().setValue("" + m);
-            });
+            minute.setOnAction(e -> minuteMenuButton.textProperty().setValue("" + m));
 
             minuteMenuButton.getItems().add(minute);
             minuteMenuButton.setMaxWidth(Double.MAX_VALUE);

@@ -9,6 +9,7 @@
 package com.omicron.organizerb.model;
 
 import lombok.Data;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -74,13 +75,15 @@ public class Task implements Serializable {
     // todo: think about this - setting two items in one setter doesn't sound good
     public void setRepetition(RepeatTask repetition) {
         this.repetition = repetition;
+
         switch (repetition) {
-            case DAILY -> dayOfRepetition = LocalDate.now().plusDays(1);
-            case WEEKLY -> dayOfRepetition = LocalDate.now().plusDays(7);
-            case MONTHLY -> dayOfRepetition = LocalDate.now().plusDays(30);
-            case YEARLY -> dayOfRepetition = LocalDate.now().plusDays(365);
+            case DAILY -> this.dayOfRepetition = LocalDate.now().plusDays(1);
+            case WEEKLY -> this.dayOfRepetition = LocalDate.now().plusDays(7);
+            case MONTHLY -> this.dayOfRepetition = LocalDate.now().plusDays(30);
+            case YEARLY -> this.dayOfRepetition = LocalDate.now().plusDays(365);
             case NONE -> dayOfRepetition = null;
         }
+
     }
 
     // ========================================================================================

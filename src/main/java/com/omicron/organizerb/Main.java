@@ -35,14 +35,14 @@ public class Main extends Application {
     }
 
     private Scene getMainScene() throws IOException {
-        var sceneFxml = new File("src/main/resources/fxml/organizer.fxml").toURI().toURL();
+        var sceneFxml = new File("fxml/organizer.fxml").toURI().toURL();
 
         FXMLLoader fxmlLoader = new FXMLLoader(sceneFxml);
         return new Scene(fxmlLoader.load(), 1100, 600);
     }
 
     private void setApplicationIcon(Stage stage) throws MalformedURLException {
-        URL appIcon = new File("src/main/resources/icons/organizer.png").toURI().toURL();
+        URL appIcon = new File("icons/organizer.png").toURI().toURL();
         stage.getIcons().add(new Image(appIcon.toString()));
     }
 

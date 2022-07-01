@@ -100,7 +100,7 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
     // -------------------------> Static internal methods
 
     public static TaskListCellController newInstance() {
-        FXMLLoader loader = getFXMLLoader("src/main/resources/fxml/taskListCell.fxml");
+        FXMLLoader loader = getFXMLLoader("fxml/taskListCell.fxml");
         try {
             loader.load();
             return loader.getController();

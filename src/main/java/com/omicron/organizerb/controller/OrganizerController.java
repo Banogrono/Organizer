@@ -4,7 +4,6 @@ import com.omicron.organizerb.Main;
 import com.omicron.organizerb.model.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -13,7 +12,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -35,10 +33,13 @@ public class OrganizerController implements Initializable {
     // -------------------------> FXML components
 
     @FXML
-    public ListView<TaskList> categoriesListView;
+    public HBox backgroundHBox;
 
     @FXML
     public Label taskListLabel;
+
+    @FXML
+    public Label taskTitleLabel;
 
     @FXML
     public ListView<Task> activeTasksListView;
@@ -47,37 +48,7 @@ public class OrganizerController implements Initializable {
     public ListView<Task> completedTasksListView;
 
     @FXML
-    public Label taskTitleLabel;
-
-    @FXML
-    public TextArea taskDescriptionTextArea;
-
-    @FXML
-    public MenuButton remindMeMenuButton;
-
-    @FXML
-    public DatePicker addDueDatePicker;
-
-    @FXML
-    public MenuButton repeatMenuButton;
-
-    @FXML
-    public Button deleteButton;
-
-    @FXML
-    public Button saveButton;
-
-    @FXML
-    public TextField addTaskTextField;
-
-    @FXML
-    public HBox backgroundHBox;
-
-    @FXML
-    public MenuButton backgroundMenuButton;
-
-    @FXML
-    public Button markAsDoneButton;
+    public ListView<TaskList> categoriesListView;
 
     @FXML
     public ContextMenu taskListContextMenu;
@@ -86,7 +57,31 @@ public class OrganizerController implements Initializable {
     public ContextMenu categoryContextMenu;
 
     @FXML
+    public TextArea taskDescriptionTextArea;
+
+    @FXML
+    public TextField addTaskTextField;
+
+    @FXML
     public TextField addCategoryTextField;
+
+    @FXML
+    public DatePicker addDueDatePicker;
+
+    @FXML
+    public Button deleteButton;
+
+    @FXML
+    public Button markAsDoneButton;
+
+    @FXML
+    public MenuButton backgroundMenuButton;
+
+    @FXML
+    public MenuButton remindMeMenuButton;
+
+    @FXML
+    public MenuButton repeatMenuButton;
 
     @FXML
     public ToggleButton themeToggleButton;
@@ -109,44 +104,29 @@ public class OrganizerController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
-        // todo: fix working path
-        System.out.println("Working Directory of the ja = " + System.getProperty("user.dir"));
-
         loadAndRefreshCategories();
         loadBackgroundsFromDirectory();
         loadApplicationSettings();
+        loadIconsForButtons();
+        loadAndSelectCategoryOnStartup();
 
-        setCellFactoryForActiveAndCompletedTaskList(); // todo: experimental feature
+        setCellFactoryForActiveAndCompletedTaskList();
 
         initializeCategoryContextMenu();
         initializeTaskListContextMenu();
         initializeRepeatMenuButton();
         initializeRemindMeMenuButton();
-        setIconsForButtons();
-
 
         disableTaskRelatedButtonsAndMenus(true);
 
-        Main.mainStageReference.setOnCloseRequest(e -> onClose());
+        checkForRepeatingTasks();
 
-
-        loadAndSelectCategoryOnStartup();
-
-
-        // todo: check if that works and then move it into separate method
-        for (var cat : categoriesListView.getItems()) {
-            for (var task : cat.getTasks()) {
-                loadTaskIfRepeated(task);
-            }
-        }
-
-
+        setOnCloseAction();
     }
 
-    private void loadAndSelectCategoryOnStartup() {
-        categoriesListView.getSelectionModel().select(applicationSettings.getLastSelectedTaskListIndex());
-        activeTasksListView.getSelectionModel().select(0);
-        refreshTaskList();
+    private void setOnCloseAction() {
+        // todo: check for memory leak
+        Main.mainStageReference.setOnCloseRequest(e -> onClose());
     }
 
 
@@ -198,13 +178,7 @@ public class OrganizerController implements Initializable {
     }
 
     @FXML
-    public void saveAllEventHandler() {
-
-        // saveAllToDisk();
-    }
-
-    @FXML
-    public void switchThemeEventHandler(ActionEvent event) {
+    public void switchThemeEventHandler() {
         try {
             if (themeToggleButton.isSelected()) {
                 loadApplicationTheme("/css/organizerLight.css");
@@ -214,12 +188,33 @@ public class OrganizerController implements Initializable {
 
             loadApplicationTheme("/css/organizerDark.css");
             applicationSettings.setApplicationThemeCSS("/css/organizerDark.css");
+
         } catch (Exception e) {
-            System.out.println(e);
+            throw new RuntimeException("Application theme could not be switched! " + e);
         }
     }
 
     // -------------------------> internal methods
+
+    private void checkForRepeatingTasks() {
+        ArrayList<Task> tasksToRemove = new ArrayList<>();
+        for (var completedTask : completedTasksListView.getItems()) {
+
+            var value = loadTaskIfRepeated(completedTask);
+            if (value != null)
+                tasksToRemove.add(completedTask);
+        }
+        for (var task : tasksToRemove) {
+            completedTasksListView.getItems().remove(task);
+        }
+    }
+
+
+    private void loadAndSelectCategoryOnStartup() {
+        categoriesListView.getSelectionModel().select(applicationSettings.getLastSelectedTaskListIndex());
+        activeTasksListView.getSelectionModel().select(0);
+        refreshTaskList();
+    }
 
     private void loadApplicationTheme(String path) {
         try {
@@ -229,11 +224,11 @@ public class OrganizerController implements Initializable {
 
 
             if (backgroundHBox.getStylesheets().get(0).contains("Light"))
-                themeToggleButton.setGraphic(getIcon("src/main/resources/icons/light_off.png"));
+                themeToggleButton.setGraphic(getIcon("/icons/light_off.png"));
             else
-                themeToggleButton.setGraphic(getIcon("src/main/resources/icons/light_on.png"));
+                themeToggleButton.setGraphic(getIcon("/icons/light_on.png"));
         } catch (Exception e) {
-            System.out.println(e);
+            throw new RuntimeException("Application themes could not be loaded! " + e);
         }
     }
 
@@ -247,7 +242,7 @@ public class OrganizerController implements Initializable {
         }
 
         if (applicationSettings.getBackground() != null)
-            setBackground("src/main/resources/backgrounds/", applicationSettings.getBackground());
+            setBackground("backgrounds/", applicationSettings.getBackground());
 
         loadApplicationTheme(applicationSettings.getApplicationThemeCSS());
 
@@ -256,22 +251,29 @@ public class OrganizerController implements Initializable {
 
     private void disableTaskRelatedButtonsAndMenus(boolean value) {
         deleteButton.disableProperty().setValue(value);
-        saveButton.disableProperty().setValue(value);
         remindMeMenuButton.disableProperty().setValue(value);
         repeatMenuButton.disableProperty().setValue(value);
         markAsDoneButton.disableProperty().setValue(value);
         addDueDatePicker.disableProperty().setValue(value);
     }
 
-    private void loadTaskIfRepeated(Task task) {
-        if (task == null) return;
-        if (Objects.equals(task.getDayOfRepetition(), LocalDate.now())) {
-            completedTasksListView.getItems().remove(task);
-            completedTasksListView.refresh();
+    private Task loadTaskIfRepeated(Task task) {
 
-            activeTasksListView.getItems().add(task);
-            activeTasksListView.refresh();
+        if (task == null) return null;
+        if (task.getRepetition() == RepeatTask.NONE) return null;
+
+        if (Objects.equals(task.getDayOfRepetition(), LocalDate.now())) {
+            System.out.println(task.getTitle());
+
+            task.setDone(false);
+            task.setRepetition(task.getRepetition());
+            categoriesListView.getItems().get(0).addTask(task);
+            refreshCategories();
+            refreshTaskList();
+
+            return task;
         }
+        return null;
     }
 
     private void markTaskAsDoneAndAddToCompletedList() {
@@ -327,15 +329,13 @@ public class OrganizerController implements Initializable {
         completedTasksListView.setCellFactory(lv -> getCustomTaskListCellController());
     }
 
-    private void setIconsForButtons() {
+    private void loadIconsForButtons() {
 
-        setIconForNodesExtendingButtonBase(saveButton, "src/main/resources/icons/save.png");
-        setIconForNodesExtendingButtonBase(markAsDoneButton, "src/main/resources/icons/done.png");
-        setIconForNodesExtendingButtonBase(deleteButton, "src/main/resources/icons/delete.png");
-
-        setIconForNodesExtendingButtonBase(remindMeMenuButton, "src/main/resources/icons/remind.png");
-        setIconForNodesExtendingButtonBase(repeatMenuButton, "src/main/resources/icons/repeat.png");
-        setIconForNodesExtendingButtonBase(backgroundMenuButton, "src/main/resources/icons/background.png");
+        setIconForNodesExtendingButtonBase(markAsDoneButton, "/icons/done.png");
+        setIconForNodesExtendingButtonBase(deleteButton, "/icons/delete.png");
+        setIconForNodesExtendingButtonBase(remindMeMenuButton, "/icons/remind.png");
+        setIconForNodesExtendingButtonBase(repeatMenuButton, "/icons/repeat.png");
+        setIconForNodesExtendingButtonBase(backgroundMenuButton, "/icons/background.png");
     }
 
     private void setIconForNodesExtendingButtonBase(ButtonBase buttonBase, String pathToIcon) {
@@ -348,7 +348,8 @@ public class OrganizerController implements Initializable {
     }
 
     private ImageView getIcon(String path) throws MalformedURLException {
-        ImageView img = new ImageView(new Image(new File(path).toURI().toURL().toString()));
+        String imageLocation = Objects.requireNonNull(getClass().getResource(path)).toExternalForm();
+        ImageView img = new ImageView(new Image(imageLocation));
         img.fitWidthProperty().setValue(MAX_ICON_SIZE);
         img.fitHeightProperty().setValue(MAX_ICON_SIZE);
         return img;
@@ -450,17 +451,16 @@ public class OrganizerController implements Initializable {
         repeatDaily.setOnAction(e -> setTaskRepetition(getSelectedTask(), RepeatTask.DAILY));
 
         MenuItem repeatWeekly = new MenuItem("Weekly");
-        repeatDaily.setOnAction(e -> setTaskRepetition(getSelectedTask(), RepeatTask.WEEKLY));
+        repeatWeekly.setOnAction(e -> setTaskRepetition(getSelectedTask(), RepeatTask.WEEKLY));
 
         MenuItem repeatMonthly = new MenuItem("Monthly");
-        repeatDaily.setOnAction(e -> setTaskRepetition(getSelectedTask(), RepeatTask.MONTHLY));
+        repeatMonthly.setOnAction(e -> setTaskRepetition(getSelectedTask(), RepeatTask.MONTHLY));
 
         MenuItem repeatYearly = new MenuItem("Yearly");
-        repeatDaily.setOnAction(e -> setTaskRepetition(getSelectedTask(), RepeatTask.YEARLY));
+        repeatYearly.setOnAction(e -> setTaskRepetition(getSelectedTask(), RepeatTask.YEARLY));
 
         MenuItem doNotRepeat = new MenuItem("Do not repeat");
-        repeatDaily.setOnAction(e -> setTaskRepetition(getSelectedTask(), RepeatTask.NONE));
-
+        doNotRepeat.setOnAction(e -> setTaskRepetition(getSelectedTask(), RepeatTask.NONE));
 
         repeatMenuButton.getItems().addAll(doNotRepeat, repeatDaily, repeatWeekly, repeatMonthly, repeatYearly);
     }
@@ -471,6 +471,7 @@ public class OrganizerController implements Initializable {
         task.setRepetition(repetition);
     }
 
+    // todo fix that
     private void initializeRemindMeMenuButton() {
 
         MenuItem remindMeLaterToday = new MenuItem("Later today");
@@ -551,7 +552,7 @@ public class OrganizerController implements Initializable {
 
     private void playReminderJingle() {
         try {
-            playSound(getFile("src/main/resources/jingels/alarm.mp3"));
+            playSound(getFile("jingle/alarm.mp3"));
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -559,7 +560,7 @@ public class OrganizerController implements Initializable {
 
     private void playDoneJingle() {
         try {
-            playSound(getFile("src/main/resources/jingels/done.mp3"));
+            playSound(getFile("jingle/done.mp3"));
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -590,19 +591,21 @@ public class OrganizerController implements Initializable {
 
     private void loadBackgroundsFromDirectory() {
 
-        // todo: refactor that
-        // get all backgrounds from background folder
-        String pathToBGFolder = "src/main/resources/backgrounds/";
+        String pathToBGFolder = "backgrounds/";
+
         String[] backgrounds = getListOfAvailableBackgrounds(pathToBGFolder);
 
-        // add newly-found backgrounds to the menu button as an item
+        addAvailableBackgroundsToMenu(pathToBGFolder, backgrounds);
+
+    }
+
+    private void addAvailableBackgroundsToMenu(String pathToBGFolder, String[] backgrounds) {
         for (var image : backgrounds) {
 
             MenuItem item = new MenuItem(image);
             item.setOnAction(event -> setBackground(pathToBGFolder, image));
             backgroundMenuButton.getItems().add(item);
         }
-
     }
 
     private void setBackground(String pathToBGFolder, String image) {
@@ -630,11 +633,9 @@ public class OrganizerController implements Initializable {
     private void loadAndRefreshCategories() {
         try {
             loadDeserializedCategories();
-
         } catch (Exception e) {
-            System.out.println(e);
             loadSampleCategories();
-
+            throw new RuntimeException("Categories could not be loaded! " + e);
         } finally {
             refreshCategories();
         }
@@ -744,32 +745,35 @@ public class OrganizerController implements Initializable {
     }
 
     private void serializeCategories() {
-        String path = "src/main/resources/programData/categories";
+        String path = "programData/categories";
         ArrayList<TaskList> categories = new ArrayList<>(categoriesListView.getItems());
         serializeObject(categories, path);
     }
 
     private void serializeCompletedTasks() {
-        String path = "src/main/resources/programData/completed";
+        String path = "programData/completed";
         ArrayList<Task> completedTasks = new ArrayList<>(completedTasksListView.getItems());
         serializeObject(completedTasks, path);
     }
 
     private void serializeApplicationSettings() {
-        String path = "src/main/resources/programData/settings";
+        String path = "programData/settings"; // Objects.requireNonNull(getClass().getResource("src/main/resources/programData/settings")).toExternalForm();
         serializeObject(this.applicationSettings, path);
     }
 
     private ApplicationSettings deserializeApplicationSettings() {
-        return (ApplicationSettings) deserializeObject("src/main/resources/programData/settings");
+        String path = "programData/settings"; // Objects.requireNonNull(getClass().getResource("src/main/resources/programData/settings")).toExternalForm();
+        return (ApplicationSettings) deserializeObject(path);
     }
 
+
+    // todo: fix that
     private ArrayList<TaskList> deserializeCategories() {
-        return (ArrayList<TaskList>) deserializeObject("src/main/resources/programData/categories");
+        return (ArrayList<TaskList>) deserializeObject("programData/categories");
     }
 
     private ArrayList<Task> deserializeCompletedTasks() {
-       return  (ArrayList<Task>) deserializeObject("src/main/resources/programData/completed");
+       return  (ArrayList<Task>) deserializeObject("programData/completed");
     }
     private Object deserializeObject(String objectPath) {
         try {
@@ -789,6 +793,8 @@ public class OrganizerController implements Initializable {
 
     private void serializeObject(Object toSerialize, String path) {
         try {
+            if (toSerialize == null) return; // todo should I inform about it being null?
+
             FileOutputStream fileOutputStream = new FileOutputStream(path);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
 
@@ -843,7 +849,5 @@ public class OrganizerController implements Initializable {
         categories.add(taskList5);
 
     }
-
-
 
 }
