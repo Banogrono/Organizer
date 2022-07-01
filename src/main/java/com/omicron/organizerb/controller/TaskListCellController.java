@@ -9,16 +9,24 @@
 package com.omicron.organizerb.controller;
 
 import com.omicron.organizerb.model.Task;
+import com.omicron.organizerb.model.TaskPriority;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
-import javafx.scene.layout.HBox;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 
@@ -34,6 +42,7 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
     public CheckBox taskCheckBox;
     @FXML
     public HBox cellHBox;
+    public Label priorityLabel;
 
 
     // -------------------------> internal fields
@@ -54,6 +63,7 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
         addListenerToChildItems();
         setActionForCheckBox();
         setGraphic(cellHBox); // set root graphic node of our custom list cell
+
     }
 
     @Override
@@ -132,6 +142,19 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
         });
     }
 
+    private void setPriorityPaneColor(TaskPriority priority) {
+
+        try {
+            switch (priority) {
+                case HIGH -> this.priorityLabel.setGraphic(getIcon("/icons/high.png"));
+                case NORMAL -> this.priorityLabel.setGraphic(null);
+                case LOW -> this.priorityLabel.setGraphic(getIcon("/icons/low.png"));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Could not load priority icons. " + e);
+        }
+    }
+
     private void addListenerToChildItems() {
         // add an un-focused listener to each child-item that triggers commitEdit
         cellHBox.getChildrenUnmodifiable().forEach(child ->
@@ -146,6 +169,15 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
         this.task = task;
         taskCheckBox.setText(task.getTitle());
         taskCheckBox.setSelected(task.isDone());
+        setPriorityPaneColor(task.getPriority());
+    }
+
+    private ImageView getIcon(String path) throws MalformedURLException {
+        String imageLocation = Objects.requireNonNull(getClass().getResource(path)).toExternalForm();
+        ImageView img = new ImageView(new Image(imageLocation));
+        img.fitWidthProperty().setValue(24);
+        img.fitHeightProperty().setValue(24);
+        return img;
     }
 
     private void makeItemInvisibleIfEmpty(boolean isEmpty) {

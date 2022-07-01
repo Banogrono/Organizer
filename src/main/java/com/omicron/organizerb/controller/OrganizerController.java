@@ -222,7 +222,6 @@ public class OrganizerController implements Initializable {
             backgroundHBox.getStylesheets().remove(0);
             backgroundHBox.getStylesheets().add(theme);
 
-
             if (backgroundHBox.getStylesheets().get(0).contains("Light"))
                 themeToggleButton.setGraphic(getIcon("/icons/light_off.png"));
             else
@@ -443,7 +442,7 @@ public class OrganizerController implements Initializable {
         if (task == null) return;
 
         task.setPriority(priority);
-        // todo: add some kind of colors to distinguish between tasks with different priorities
+        refreshTaskList();
     }
 
     private void initializeRepeatMenuButton() {
