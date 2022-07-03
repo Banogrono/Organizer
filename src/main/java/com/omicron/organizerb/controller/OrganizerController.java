@@ -20,6 +20,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.*;
 
@@ -470,7 +471,6 @@ public class OrganizerController implements Initializable {
         task.setRepetition(repetition);
     }
 
-    // todo fix that
     private void initializeRemindMeMenuButton() {
 
         MenuItem remindMeLaterToday = new MenuItem("Later today");
@@ -478,38 +478,65 @@ public class OrganizerController implements Initializable {
         MenuItem remindMeNextWeek = new MenuItem("Next Week");
         MenuItem remindMeCustomTime = new MenuItem("Custom");
 
-        // todo: figure out how to save that | think about custom time
-        remindMeLaterToday.setOnAction(e -> setReminder(7200000)); // 2 hours
-        remindMeTomorrow.setOnAction(e -> setReminder(LocalDate.now().plusDays(1))); // 1 day
-        remindMeNextWeek.setOnAction(e -> setReminder(LocalDate.now().plusDays(7))); // 1 week
-        remindMeCustomTime.setOnAction(e -> Platform.runLater(() -> CustomTimePopupController.display(getSelectedTask())));
+
+        remindMeLaterToday.setOnAction(e -> {
+            Task task = getSelectedTask();
+            task.setDate(LocalDate.now());
+            task.setTime(LocalTime.now().plusHours(1));
+            setReminder(task);
+        });
+
+        remindMeTomorrow.setOnAction(e -> {
+            Task task = getSelectedTask();
+            task.setDate(LocalDate.now().plusDays(1));
+            task.setTime(LocalTime.of(0,0));
+            setReminder(task);
+        });
+
+        remindMeNextWeek.setOnAction(e -> {
+            Task task = getSelectedTask();
+            task.setDate(LocalDate.now().plusDays(7));
+            task.setTime(LocalTime.of(0, 0));
+            setReminder(task);
+        });
+
+        remindMeCustomTime.setOnAction(e -> Platform.runLater(() -> {
+            Task task = getSelectedTask();
+            CustomTimePopupController.display(task);
+            setReminder(task);
+        }));
 
 
         remindMeMenuButton.getItems().addAll(remindMeLaterToday, remindMeTomorrow, remindMeNextWeek, remindMeCustomTime);
     }
 
-    private void setReminder(long delay) {
-
-        Task task = getSelectedTask();
+    private void setReminder(Task task) {
 
         if (task == null) return;
 
         Timer timer = new Timer();
         TimerTask job = getTimerTask(task);
 
-        timer.schedule(job, delay);
+        if (task.getDate().equals(LocalDate.now())) {
+
+            long differenceInMilliseconds = CompareAndReturnTimeDifferenceInMilliseconds(task);
+
+            timer.schedule(job, differenceInMilliseconds);
+            return;
+        }
+
+       timer.schedule(job, Date.from(task.getDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
     }
 
-    private void setReminder(LocalDate date) {
+    private long CompareAndReturnTimeDifferenceInMilliseconds(Task task) {
+        LocalTime now = LocalTime.now();
+        LocalTime taskTime = task.getTime();
 
-        Task task = getSelectedTask();
-
-        if (task == null) return;
-
-        Timer timer = new Timer();
-        TimerTask job = getTimerTask(task);
-
-        timer.schedule(job, Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        return (taskTime
+                .minusHours(now.getHour())
+                .minusMinutes(now.getMinute())
+                .minusSeconds(now.getSecond())
+                .toSecondOfDay()) * 1000L;
     }
 
     private TimerTask getTimerTask(Task task) {
@@ -519,7 +546,6 @@ public class OrganizerController implements Initializable {
                 // play remind jingle
                 playReminderJingle();
 
-                // todo: set off alert box with task info
                 Platform.runLater(() -> ReminderPopupController.display(task));
             }
         };
