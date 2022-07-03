@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.function.BiConsumer;
 
 public class OrganizerController implements Initializable {
 
@@ -90,11 +91,9 @@ public class OrganizerController implements Initializable {
 
     // -------------------------> private fields
 
-    ArrayList<TaskList> categories;
+    private ArrayList<TaskList> categories;
 
-    ApplicationSettings applicationSettings;
-
-    final int MAX_ICON_SIZE = 24;
+    private ApplicationSettings applicationSettings;
 
 
     // ========================================================================================
@@ -111,7 +110,7 @@ public class OrganizerController implements Initializable {
         loadIconsForButtons();
         loadAndSelectCategoryOnStartup();
 
-        setCellFactoryForActiveAndCompletedTaskList();
+        setCustomCellsFactoriesForTaskLists();
 
         initializeCategoryContextMenu();
         initializeTaskListContextMenu();
@@ -125,18 +124,11 @@ public class OrganizerController implements Initializable {
         setOnCloseAction();
     }
 
-    private void setOnCloseAction() {
-        // todo: check for memory leak
-        Main.mainStageReference.setOnCloseRequest(e -> onClose());
-    }
-
-
     // -------------------------> FXML methods
 
     @FXML
     public void loadTasksEventHandler() {
-        disableTaskRelatedButtonsAndMenus(true);
-        refreshTaskList();
+        loadTasks();
     }
 
     @FXML
@@ -151,8 +143,7 @@ public class OrganizerController implements Initializable {
 
     @FXML
     public void loadTaskDetailsEventHandler() {
-        disableButtonsIfSelectedTaskIsNull();
-        refreshTaskDetails();
+        loadTaskDetails();
     }
 
     @FXML
@@ -162,15 +153,12 @@ public class OrganizerController implements Initializable {
 
     @FXML
     public void addTaskDueDateEventHandler() {
-        setTaskDeadLine();
+        setSelectedTaskDeadLine();
     }
 
     @FXML
     public void deleteTaskEventHandler() {
-        if (getSelectedTask() != null)
-            deleteSelectedTaskAndRefresh();
-
-        deleteSelectedTaskFromCompletedTasksAndRefresh();
+        deleteSelectedTaskAndRefresh();
     }
 
     @FXML
@@ -180,6 +168,21 @@ public class OrganizerController implements Initializable {
 
     @FXML
     public void switchThemeEventHandler() {
+        switchApplicationTheme();
+    }
+
+    // -------------------------> internal methods
+
+    private void setOnCloseAction() {
+        Main.mainStageReference.setOnCloseRequest(e -> onClose());
+    }
+
+    private void loadTasks() {
+        disableTaskRelatedButtonsAndMenus(true);
+        refreshTaskList();
+    }
+
+    private void switchApplicationTheme() {
         try {
             if (themeToggleButton.isSelected()) {
                 loadApplicationTheme("/css/organizerLight.css");
@@ -195,13 +198,11 @@ public class OrganizerController implements Initializable {
         }
     }
 
-    // -------------------------> internal methods
-
     private void checkForRepeatingTasks() {
         ArrayList<Task> tasksToRemove = new ArrayList<>();
-        for (var completedTask : completedTasksListView.getItems()) {
 
-            var value = loadTaskIfRepeated(completedTask);
+        for (var completedTask : completedTasksListView.getItems()) {
+             Task value = loadTaskIfRepeated(completedTask);
             if (value != null)
                 tasksToRemove.add(completedTask);
         }
@@ -209,7 +210,6 @@ public class OrganizerController implements Initializable {
             completedTasksListView.getItems().remove(task);
         }
     }
-
 
     private void loadAndSelectCategoryOnStartup() {
         categoriesListView.getSelectionModel().select(applicationSettings.getLastSelectedTaskListIndex());
@@ -238,16 +238,18 @@ public class OrganizerController implements Initializable {
         } catch (Exception e) {
             System.out.println("Settings file not found. " + e);
             applicationSettings = new ApplicationSettings();
-
         }
 
         if (applicationSettings.getBackground() != null)
-            setBackground("backgrounds/", applicationSettings.getBackground());
+            setHBoxBackground("backgrounds/", applicationSettings.getBackground());
 
         loadApplicationTheme(applicationSettings.getApplicationThemeCSS());
-
     }
 
+    private void loadTaskDetails() {
+        disableButtonsIfSelectedTaskIsNull();
+        refreshTaskDetails();
+    }
 
     private void disableTaskRelatedButtonsAndMenus(boolean value) {
         deleteButton.disableProperty().setValue(value);
@@ -263,14 +265,14 @@ public class OrganizerController implements Initializable {
         if (task.getRepetition() == RepeatTask.NONE) return null;
 
         if (Objects.equals(task.getDayOfRepetition(), LocalDate.now())) {
-            System.out.println(task.getTitle());
 
             task.setDone(false);
             task.setRepetition(task.getRepetition());
+
             categoriesListView.getItems().get(0).addTask(task);
+
             refreshCategories();
             refreshTaskList();
-
             return task;
         }
         return null;
@@ -279,6 +281,10 @@ public class OrganizerController implements Initializable {
     private void markTaskAsDoneAndAddToCompletedList() {
         Task task = getSelectedTask();
         if (task == null) return;
+
+        // todo: the mark as done option for tasks in completed list should be grayed out or turned into 'mark as active'
+        if (completedTasksListView.getItems().contains(task))
+            return;
 
         task.setDone(true);
         getSelectedCategoryItem().getTasks().remove(task);
@@ -289,9 +295,9 @@ public class OrganizerController implements Initializable {
 
     }
 
-    private void setTaskDeadLine() {
+    private void setSelectedTaskDeadLine() {
         if (addDueDatePicker.getValue() != null)
-            setTaskDeadLine(addDueDatePicker.getValue());
+            setSelectedTaskDeadLine(addDueDatePicker.getValue());
     }
 
     private void addNewTaskToSelectedCategory(KeyEvent event) {
@@ -311,34 +317,38 @@ public class OrganizerController implements Initializable {
 
     private void addNewCategory(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
-            if (!(addCategoryTextField.getText() == null || addCategoryTextField.getText().isBlank())) {
 
-                // create new taskList, aka category
+            boolean isCategoryNameValid =
+                    addCategoryTextField.getText() != null && !addCategoryTextField.getText().isBlank();
+
+            if (isCategoryNameValid) {
+
                 TaskList taskList = new TaskList();
 
                 taskList.setTaskListTitle(addCategoryTextField.getText());
                 categories.add(taskList);
                 refreshCategories();
+
                 addCategoryTextField.setText("");
             }
         }
     }
 
-    private void setCellFactoryForActiveAndCompletedTaskList() {
+    private void setCustomCellsFactoriesForTaskLists() {
         activeTasksListView.setCellFactory(lv -> getCustomTaskListCellController());
         completedTasksListView.setCellFactory(lv -> getCustomTaskListCellController());
     }
 
     private void loadIconsForButtons() {
 
-        setIconForNodesExtendingButtonBase(markAsDoneButton, "/icons/done.png");
-        setIconForNodesExtendingButtonBase(deleteButton, "/icons/delete.png");
-        setIconForNodesExtendingButtonBase(remindMeMenuButton, "/icons/remind.png");
-        setIconForNodesExtendingButtonBase(repeatMenuButton, "/icons/repeat.png");
-        setIconForNodesExtendingButtonBase(backgroundMenuButton, "/icons/background.png");
+        setIconForNodes(markAsDoneButton, "/icons/done.png");
+        setIconForNodes(deleteButton, "/icons/delete.png");
+        setIconForNodes(remindMeMenuButton, "/icons/remind.png");
+        setIconForNodes(repeatMenuButton, "/icons/repeat.png");
+        setIconForNodes(backgroundMenuButton, "/icons/background.png");
     }
 
-    private void setIconForNodesExtendingButtonBase(ButtonBase buttonBase, String pathToIcon) {
+    private void setIconForNodes(ButtonBase buttonBase, String pathToIcon) {
         try {
             buttonBase.setGraphic(getIcon(pathToIcon));
             buttonBase.alignmentProperty().setValue(Pos.BOTTOM_LEFT);
@@ -349,9 +359,12 @@ public class OrganizerController implements Initializable {
 
     private ImageView getIcon(String path) throws MalformedURLException {
         String imageLocation = Objects.requireNonNull(getClass().getResource(path)).toExternalForm();
+
         ImageView img = new ImageView(new Image(imageLocation));
+        int MAX_ICON_SIZE = 24;
         img.fitWidthProperty().setValue(MAX_ICON_SIZE);
         img.fitHeightProperty().setValue(MAX_ICON_SIZE);
+
         return img;
     }
 
@@ -360,12 +373,12 @@ public class OrganizerController implements Initializable {
         MenuItem markTaskAsDone = initializeMarkTaskAsDoneMenuItem();
         Menu moveTask = initializeMoveTaskToMenu();
         MenuItem deleteTask = initializeDeleteTaskMenuItem();
-        Menu setTaskPriority = initializeSetTaskPriorityMenu();
+        Menu setTaskPriority = initializeTaskPriorityMenu();
 
         taskListContextMenu.getItems().addAll(markTaskAsDone, moveTask, deleteTask, setTaskPriority);
     }
 
-    private Menu initializeSetTaskPriorityMenu() {
+    private Menu initializeTaskPriorityMenu() {
         Menu setTaskPriority = new Menu("Set priority...");
 
         for (var priority : TaskPriority.values()) {
@@ -386,7 +399,6 @@ public class OrganizerController implements Initializable {
 
     private MenuItem initializeMarkTaskAsDoneMenuItem() {
         MenuItem markTaskAsDone = new MenuItem("Done");
-
         markTaskAsDone.setOnAction(event -> markTaskAsDoneEventHandler());
         return markTaskAsDone;
     }
@@ -400,17 +412,22 @@ public class OrganizerController implements Initializable {
 
             MenuItem menuItem = new MenuItem(category.getTaskListTitle());
 
-            menuItem.setOnAction(e -> {
-                Task task = getSelectedTask();
-                if (task == null) return;
+            moveTaskToDifferentCategory(category, menuItem);
 
-                getSelectedCategoryItem().getTasks().remove(task);
-                category.addTask(task);
-                refreshTaskList();
-            });
             moveTask.getItems().add(menuItem);
         }
         return moveTask;
+    }
+
+    private void moveTaskToDifferentCategory(TaskList category, MenuItem menuItem) {
+        menuItem.setOnAction(e -> {
+            Task task = getSelectedTask();
+            if (task == null) return;
+
+            getSelectedCategoryItem().getTasks().remove(task);
+            category.addTask(task);
+            refreshTaskList();
+        });
     }
 
     private void initializeCategoryContextMenu() {
@@ -425,6 +442,7 @@ public class OrganizerController implements Initializable {
         categoryContextMenu.getItems().add(deleteCategoryMenuItem);
     }
 
+    // todo: make that work as it should
     private void renameCategory() {
         if (getSelectedCategoryItem() == null) return;
         getSelectedCategoryItem().setTaskListTitle("next");
@@ -478,34 +496,27 @@ public class OrganizerController implements Initializable {
         MenuItem remindMeNextWeek = new MenuItem("Next Week");
         MenuItem remindMeCustomTime = new MenuItem("Custom");
 
-
-        remindMeLaterToday.setOnAction(e -> {
+        BiConsumer<LocalTime, LocalDate> consumer = (LocalTime time, LocalDate date) -> {
             Task task = getSelectedTask();
-            task.setDate(LocalDate.now());
-            task.setTime(LocalTime.now().plusHours(1));
+            task.setDate(date);
+            task.setTime(time);
             setReminder(task);
-        });
+        };
 
-        remindMeTomorrow.setOnAction(e -> {
-            Task task = getSelectedTask();
-            task.setDate(LocalDate.now().plusDays(1));
-            task.setTime(LocalTime.of(0,0));
-            setReminder(task);
-        });
+        remindMeLaterToday.setOnAction(e ->
+                consumer.accept(LocalTime.now().plusHours(1), LocalDate.now()));
 
-        remindMeNextWeek.setOnAction(e -> {
-            Task task = getSelectedTask();
-            task.setDate(LocalDate.now().plusDays(7));
-            task.setTime(LocalTime.of(0, 0));
-            setReminder(task);
-        });
+        remindMeTomorrow.setOnAction(e ->
+                consumer.accept(LocalTime.of(0,0), LocalDate.now().plusDays(1)));
+
+        remindMeNextWeek.setOnAction(e ->
+                consumer.accept(LocalTime.of(0,0), LocalDate.now().plusDays(7)));
 
         remindMeCustomTime.setOnAction(e -> Platform.runLater(() -> {
             Task task = getSelectedTask();
             CustomTimePopupController.display(task);
             setReminder(task);
         }));
-
 
         remindMeMenuButton.getItems().addAll(remindMeLaterToday, remindMeTomorrow, remindMeNextWeek, remindMeCustomTime);
     }
@@ -564,15 +575,11 @@ public class OrganizerController implements Initializable {
 
     private void deleteSelectedTaskAndRefresh() {
         if (getSelectedTask() == null) return;
+
         getSelectedCategoryItem().getTasks().remove(getSelectedTask());
+        completedTasksListView.getItems().remove(getSelectedTask());
+
         refreshTaskList();
-    }
-
-    private void deleteSelectedTaskFromCompletedTasksAndRefresh() {
-        if (getSelectedTaskFromCompletedTasksList() == null) return;
-
-        completedTasksListView.getItems().remove(getSelectedTaskFromCompletedTasksList());
-        completedTasksListView.refresh();
     }
 
     private void playReminderJingle() {
@@ -595,6 +602,7 @@ public class OrganizerController implements Initializable {
         return new File(pathname);
     }
 
+    // todo: separate thread for that?
     private void playSound(File soundFile) throws MalformedURLException {
         Media sound = new Media(soundFile.toURI().toURL().toString());
 
@@ -603,13 +611,13 @@ public class OrganizerController implements Initializable {
         mediaPlayer.play();
     }
 
-    private void setTaskDeadLine(LocalDate date) {
+    private void setSelectedTaskDeadLine(LocalDate date) {
         if (getSelectedTask() == null) return;
 
         getSelectedTask().setDate(date);
     }
 
-    private String[] getListOfAvailableBackgrounds(String path) {
+    private String[] findBackgrounds(String path) {
         File file = getFile(path);
         return file.list();
     }
@@ -618,7 +626,7 @@ public class OrganizerController implements Initializable {
 
         String pathToBGFolder = "backgrounds/";
 
-        String[] backgrounds = getListOfAvailableBackgrounds(pathToBGFolder);
+        String[] backgrounds = findBackgrounds(pathToBGFolder);
 
         addAvailableBackgroundsToMenu(pathToBGFolder, backgrounds);
 
@@ -628,24 +636,24 @@ public class OrganizerController implements Initializable {
         for (var image : backgrounds) {
 
             MenuItem item = new MenuItem(image);
-            item.setOnAction(event -> setBackground(pathToBGFolder, image));
+            item.setOnAction(event -> setHBoxBackground(pathToBGFolder, image));
             backgroundMenuButton.getItems().add(item);
         }
     }
 
-    private void setBackground(String pathToBGFolder, String image) {
+    private void setHBoxBackground(String pathToBGFolder, String image) {
         try {
             if (applicationSettings != null)
                 applicationSettings.setBackground(image);
 
-            Background background = createBackgroundForHBox(new Image(new FileInputStream(pathToBGFolder + image)));
+            Background background = createBackgroundFromImage(new Image(new FileInputStream(pathToBGFolder + image)));
             backgroundHBox.setBackground(background);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private Background createBackgroundForHBox(Image image) {
+    private Background createBackgroundFromImage(Image image) {
         BackgroundSize size = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true);
 
         return new Background(new BackgroundImage(image,
@@ -668,7 +676,7 @@ public class OrganizerController implements Initializable {
 
     private void loadSampleCategories() {
         categories = new ArrayList<>();
-        createAndLoadSampleData(); // todo get rid of that at some point
+        createAndLoadSampleData();
     }
 
     private void loadDeserializedCategories() {
@@ -688,36 +696,41 @@ public class OrganizerController implements Initializable {
         refreshTaskDetails();
     }
 
+    // todo, wont just refresh work?
     private void refreshCategories() {
         categoriesListView.setItems(FXCollections.observableArrayList(categories));
     }
 
     private void refreshTaskList() {
+        // todo: think about simplifying this
         int selectedCategoryIndex = getSelectedCategoryIndex();
         if (selectedCategoryIndex < 0 || selectedCategoryIndex >= categories.size()) return;
 
         TaskList tasks = categories.get(selectedCategoryIndex);
 
         activeTasksListView.setItems(FXCollections.observableArrayList(tasks.getTasks()));
-        setContentOfCategoryLabel();
+        updateContentOfCategoryLabel();
+
+        completedTasksListView.refresh();
+
     }
 
     private void refreshTaskDetails() {
         if (getSelectedTask() == null) return;
-        setContentOfDescriptionTextAreaInTaskDetailsPane();
-        setContentOfTaskTitleLabel();
-        setContentOfDatePicker();
+        updateTaskDescriptionInDetailsPane();
+        updateContentOfTaskTitleLabel();
+        updateContentOfDatePicker();
     }
 
-    private void setContentOfDatePicker() {
+    private void updateContentOfDatePicker() {
         addDueDatePicker.setValue(getSelectedTask().getDate());
     }
 
-    private void setContentOfCategoryLabel() {
+    private void updateContentOfCategoryLabel() {
         taskListLabel.setText(getSelectedCategoryItem().getTaskListTitle());
     }
 
-    private void setContentOfTaskTitleLabel() {
+    private void updateContentOfTaskTitleLabel() {
         Task task = getSelectedTask();
 
         String title = task.getTitle() == null ? "" : task.getTitle();
@@ -725,7 +738,7 @@ public class OrganizerController implements Initializable {
         taskTitleLabel.setText(title);
     }
 
-    private void setContentOfDescriptionTextAreaInTaskDetailsPane() {
+    private void updateTaskDescriptionInDetailsPane() {
 
         String description = getSelectedTask().getDescription();
 
@@ -744,11 +757,10 @@ public class OrganizerController implements Initializable {
     }
 
     private Task getSelectedTask() {
-        return activeTasksListView.getSelectionModel().getSelectedItem();
-    }
+        Task activeTask = activeTasksListView.getSelectionModel().getSelectedItem();
+        Task completedTask = completedTasksListView.getSelectionModel().getSelectedItem();
 
-    private Task getSelectedTaskFromCompletedTasksList() {
-        return completedTasksListView.getSelectionModel().getSelectedItem();
+        return activeTask == null ? completedTask : activeTask;
     }
 
     private void clearAddTaskTextFiled() {
@@ -763,7 +775,7 @@ public class OrganizerController implements Initializable {
         disableTaskRelatedButtonsAndMenus(getSelectedTask() == null);
     }
 
-    private void saveAllToDisk() {
+    private void saveDataToDisk() {
         serializeCategories();
         serializeCompletedTasks();
         serializeApplicationSettings();
@@ -782,24 +794,28 @@ public class OrganizerController implements Initializable {
     }
 
     private void serializeApplicationSettings() {
-        String path = "programData/settings"; // Objects.requireNonNull(getClass().getResource("src/main/resources/programData/settings")).toExternalForm();
+        String path = "programData/settings";
         serializeObject(this.applicationSettings, path);
     }
 
     private ApplicationSettings deserializeApplicationSettings() {
-        String path = "programData/settings"; // Objects.requireNonNull(getClass().getResource("src/main/resources/programData/settings")).toExternalForm();
+        String path = "programData/settings";
         return (ApplicationSettings) deserializeObject(path);
     }
 
 
-    // todo: fix that
+    @SuppressWarnings("unchecked")
     private ArrayList<TaskList> deserializeCategories() {
         return (ArrayList<TaskList>) deserializeObject("programData/categories");
     }
 
+
+    @SuppressWarnings("unchecked")
     private ArrayList<Task> deserializeCompletedTasks() {
        return  (ArrayList<Task>) deserializeObject("programData/completed");
     }
+
+
     private Object deserializeObject(String objectPath) {
         try {
             FileInputStream fileInputStream = new FileInputStream(objectPath);
@@ -818,8 +834,6 @@ public class OrganizerController implements Initializable {
 
     private void serializeObject(Object toSerialize, String path) {
         try {
-            if (toSerialize == null) return; // todo should I inform about it being null?
-
             FileOutputStream fileOutputStream = new FileOutputStream(path);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
 
@@ -834,7 +848,7 @@ public class OrganizerController implements Initializable {
     }
 
     private void onClose() {
-        saveAllToDisk();
+        saveDataToDisk();
     }
 
     // -------------------------> test/ debug methods
@@ -874,5 +888,4 @@ public class OrganizerController implements Initializable {
         categories.add(taskList5);
 
     }
-
 }
