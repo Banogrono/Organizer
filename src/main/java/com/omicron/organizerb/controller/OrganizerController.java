@@ -143,35 +143,61 @@ public class OrganizerController implements Initializable {
 
     @FXML
     public void loadTaskDetailsEventHandler() {
-        loadTaskDetails();
+        loadActiveTaskDetails();
+    }
+
+    @FXML
+    public void loadCompletedTaskDetailsEventHandler() {
+        loadCompletedTaskDetails();
     }
 
     @FXML
     public void updateTaskDescriptionEventHandler() {
-        updateTaskDescription();
+        updateTaskDescription(getSelectedTask());
     }
 
     @FXML
     public void addTaskDueDateEventHandler() {
-        setSelectedTaskDeadLine();
+        setSelectedTaskDeadLine(getSelectedTask());
     }
 
     @FXML
     public void deleteTaskEventHandler() {
-        deleteSelectedTaskAndRefresh();
+        deleteSelectedTaskAndRefresh(getSelectedTask());
     }
 
     @FXML
-    public void markTaskAsDoneEventHandler() {
-        markTaskAsDoneAndAddToCompletedList();
+    public void markTaskAsDoneOrActiveEventHandler() {
+        markTaskAsDoneOrActive();
     }
+
 
     @FXML
     public void switchThemeEventHandler() {
         switchApplicationTheme();
     }
 
+
     // -------------------------> internal methods
+
+    private void markTaskAsDoneOrActive() {
+        Task task = getSelectedTask();
+        if (completedTasksListView.getItems().contains(task))
+            markTaskAsActiveAndAddToActiveList(task);
+        else
+            markTaskAsDoneAndAddToCompletedList(task);
+    }
+
+    private void loadActiveTaskDetails() {
+        completedTasksListView.getSelectionModel().clearSelection();
+        loadTaskDetails(getSelectedTask());
+    }
+
+    private void loadCompletedTaskDetails() {
+        activeTasksListView.getSelectionModel().clearSelection();
+        Task task = completedTasksListView.getSelectionModel().getSelectedItem();
+        loadTaskDetails(task);
+    }
 
     private void setOnCloseAction() {
         Main.mainStageReference.setOnCloseRequest(e -> onClose());
@@ -202,7 +228,7 @@ public class OrganizerController implements Initializable {
         ArrayList<Task> tasksToRemove = new ArrayList<>();
 
         for (var completedTask : completedTasksListView.getItems()) {
-             Task value = loadTaskIfRepeated(completedTask);
+            Task value = loadTaskIfRepeated(completedTask);
             if (value != null)
                 tasksToRemove.add(completedTask);
         }
@@ -246,9 +272,15 @@ public class OrganizerController implements Initializable {
         loadApplicationTheme(applicationSettings.getApplicationThemeCSS());
     }
 
-    private void loadTaskDetails() {
+    private void loadTaskDetails(Task task) {
+
+        if (completedTasksListView.getItems().contains(task))
+            markAsDoneButton.setText("Mark as Active");
+        else
+            markAsDoneButton.setText("Mark as Done");
+
         disableButtonsIfSelectedTaskIsNull();
-        refreshTaskDetails();
+        refreshTaskDetails(task);
     }
 
     private void disableTaskRelatedButtonsAndMenus(boolean value) {
@@ -278,13 +310,7 @@ public class OrganizerController implements Initializable {
         return null;
     }
 
-    private void markTaskAsDoneAndAddToCompletedList() {
-        Task task = getSelectedTask();
-        if (task == null) return;
-
-        // todo: the mark as done option for tasks in completed list should be grayed out or turned into 'mark as active'
-        if (completedTasksListView.getItems().contains(task))
-            return;
+    private void markTaskAsDoneAndAddToCompletedList(Task task) {
 
         task.setDone(true);
         getSelectedCategoryItem().getTasks().remove(task);
@@ -295,9 +321,18 @@ public class OrganizerController implements Initializable {
 
     }
 
-    private void setSelectedTaskDeadLine() {
+    private void markTaskAsActiveAndAddToActiveList(Task task) {
+
+        completedTasksListView.getItems().remove(task);
+        task.setDone(false);
+        getSelectedCategoryItem().getTasks().add(task);
+
+        refreshTaskList();
+    }
+
+    private void setSelectedTaskDeadLine(Task task) {
         if (addDueDatePicker.getValue() != null)
-            setSelectedTaskDeadLine(addDueDatePicker.getValue());
+            task.setDate(addDueDatePicker.getValue());
     }
 
     private void addNewTaskToSelectedCategory(KeyEvent event) {
@@ -399,7 +434,7 @@ public class OrganizerController implements Initializable {
 
     private MenuItem initializeMarkTaskAsDoneMenuItem() {
         MenuItem markTaskAsDone = new MenuItem("Done");
-        markTaskAsDone.setOnAction(event -> markTaskAsDoneEventHandler());
+        markTaskAsDone.setOnAction(event -> markTaskAsDoneOrActiveEventHandler());
         return markTaskAsDone;
     }
 
@@ -507,10 +542,10 @@ public class OrganizerController implements Initializable {
                 consumer.accept(LocalTime.now().plusHours(1), LocalDate.now()));
 
         remindMeTomorrow.setOnAction(e ->
-                consumer.accept(LocalTime.of(0,0), LocalDate.now().plusDays(1)));
+                consumer.accept(LocalTime.of(0, 0), LocalDate.now().plusDays(1)));
 
         remindMeNextWeek.setOnAction(e ->
-                consumer.accept(LocalTime.of(0,0), LocalDate.now().plusDays(7)));
+                consumer.accept(LocalTime.of(0, 0), LocalDate.now().plusDays(7)));
 
         remindMeCustomTime.setOnAction(e -> Platform.runLater(() -> {
             Task task = getSelectedTask();
@@ -536,7 +571,7 @@ public class OrganizerController implements Initializable {
             return;
         }
 
-       timer.schedule(job, Date.from(task.getDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        timer.schedule(job, Date.from(task.getDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
     }
 
     private long CompareAndReturnTimeDifferenceInMilliseconds(Task task) {
@@ -573,12 +608,9 @@ public class OrganizerController implements Initializable {
         return taskListCell;
     }
 
-    private void deleteSelectedTaskAndRefresh() {
-        if (getSelectedTask() == null) return;
-
-        getSelectedCategoryItem().getTasks().remove(getSelectedTask());
-        completedTasksListView.getItems().remove(getSelectedTask());
-
+    private void deleteSelectedTaskAndRefresh(Task task) {
+        getSelectedCategoryItem().getTasks().remove(task);
+        completedTasksListView.getItems().remove(task);
         refreshTaskList();
     }
 
@@ -609,12 +641,6 @@ public class OrganizerController implements Initializable {
         MediaPlayer mediaPlayer = new MediaPlayer(sound);
 
         mediaPlayer.play();
-    }
-
-    private void setSelectedTaskDeadLine(LocalDate date) {
-        if (getSelectedTask() == null) return;
-
-        getSelectedTask().setDate(date);
     }
 
     private String[] findBackgrounds(String path) {
@@ -684,16 +710,15 @@ public class OrganizerController implements Initializable {
         completedTasksListView.setItems(FXCollections.observableArrayList(deserializeCompletedTasks()));
     }
 
-    private void updateTaskDescription() {
+    private void updateTaskDescription(Task task) {
         String content = taskDescriptionTextArea.getText();
-        Task task = getSelectedTask();
 
         if (content == null || content.isBlank() || task == null) return;
 
         taskDescriptionTextArea.setText(task.getDescription());
 
         getSelectedTask().setDescription(content);
-        refreshTaskDetails();
+        refreshTaskDetails(task);
     }
 
     // todo, wont just refresh work?
@@ -715,32 +740,31 @@ public class OrganizerController implements Initializable {
 
     }
 
-    private void refreshTaskDetails() {
-        if (getSelectedTask() == null) return;
-        updateTaskDescriptionInDetailsPane();
-        updateContentOfTaskTitleLabel();
-        updateContentOfDatePicker();
+    private void refreshTaskDetails(Task task) {
+        if (task == null) return;
+        updateTaskDescriptionInDetailsPane(task);
+        updateContentOfTaskTitleLabel(task);
+        updateContentOfDatePicker(task);
     }
 
-    private void updateContentOfDatePicker() {
-        addDueDatePicker.setValue(getSelectedTask().getDate());
+    private void updateContentOfDatePicker(Task task) {
+        addDueDatePicker.setValue(task.getDate());
     }
 
     private void updateContentOfCategoryLabel() {
         taskListLabel.setText(getSelectedCategoryItem().getTaskListTitle());
     }
 
-    private void updateContentOfTaskTitleLabel() {
-        Task task = getSelectedTask();
+    private void updateContentOfTaskTitleLabel(Task task) {
 
         String title = task.getTitle() == null ? "" : task.getTitle();
 
         taskTitleLabel.setText(title);
     }
 
-    private void updateTaskDescriptionInDetailsPane() {
+    private void updateTaskDescriptionInDetailsPane(Task task) {
 
-        String description = getSelectedTask().getDescription();
+        String description = task.getDescription();
 
         if (description != null)
             taskDescriptionTextArea.setText(description);
@@ -812,7 +836,7 @@ public class OrganizerController implements Initializable {
 
     @SuppressWarnings("unchecked")
     private ArrayList<Task> deserializeCompletedTasks() {
-       return  (ArrayList<Task>) deserializeObject("programData/completed");
+        return (ArrayList<Task>) deserializeObject("programData/completed");
     }
 
 
@@ -888,4 +912,6 @@ public class OrganizerController implements Initializable {
         categories.add(taskList5);
 
     }
+
+
 }

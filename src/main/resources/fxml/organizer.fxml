@@ -72,7 +72,7 @@
                   <Font name="Century Gothic Bold" size="12.0" />
                </font>
             </Label>
-            <ListView fx:id="completedTasksListView" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" onMouseReleased="#loadTaskDetailsEventHandler" prefHeight="300.0">
+            <ListView fx:id="completedTasksListView" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" onMouseReleased="#loadCompletedTaskDetailsEventHandler" prefHeight="300.0">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
@@ -129,7 +129,7 @@
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>
                   </Separator>
-                  <Button fx:id="markAsDoneButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#markTaskAsDoneEventHandler" text="Mark as Done ">
+                  <Button fx:id="markAsDoneButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#markTaskAsDoneOrActiveEventHandler" text="Mark as Done ">
                      <VBox.margin>
                         <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                      </VBox.margin>
