@@ -14,7 +14,7 @@
     /*scroll bar*/
     -fx-color-3: #a9a9a9;
     /* List, cells and text fields backgrounds*/
-    -fx-color-4: #ffffff;
+    -fx-color-4: #F3F3F3;
     /* selection*/
     -fx-color-5: #dadada;
     /* Side panes*/
@@ -50,6 +50,12 @@
 
 #addTaskTextField {
     -fx-padding: 16px;
+}
+
+#categoryTextField {
+    -fx-background-color: -fx-color-transparent;
+    -fx-text-fill: -fx-color-2;
+    -fx-opacity: 1;
 }
 
 /* ----------------------------------------------------------------------------------------------- */

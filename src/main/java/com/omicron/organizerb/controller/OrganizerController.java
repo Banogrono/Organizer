@@ -111,6 +111,7 @@ public class OrganizerController implements Initializable {
         loadAndSelectCategoryOnStartup();
 
         setCustomCellsFactoriesForTaskLists();
+        setCustomCellsFactoriesForCategories();
 
         initializeCategoryContextMenu();
         initializeTaskListContextMenu();
@@ -374,6 +375,10 @@ public class OrganizerController implements Initializable {
         completedTasksListView.setCellFactory(lv -> getCustomTaskListCellController());
     }
 
+    private void setCustomCellsFactoriesForCategories() {
+        categoriesListView.setCellFactory(lv -> getCustomCategoryListCellController());
+    }
+
     private void loadIconsForButtons() {
 
         setIconForNodes(markAsDoneButton, "/icons/done.png");
@@ -475,7 +480,10 @@ public class OrganizerController implements Initializable {
 
         categoryContextMenu.getItems().add(renameCategoryMenuItem);
         categoryContextMenu.getItems().add(deleteCategoryMenuItem);
+
     }
+
+
 
     // todo: make that work as it should
     private void renameCategory() {
@@ -608,6 +616,17 @@ public class OrganizerController implements Initializable {
         return taskListCell;
     }
 
+    private CategoryListCellController getCustomCategoryListCellController() {
+        CategoryListCellController categoryListCell = CategoryListCellController.newInstance();
+
+        if (categoryListCell == null)
+            throw new RuntimeException("CategoryListCellController object is a null!");
+
+        // set reference of this object in task list controller, so it can access methods of this object
+        categoryListCell.setOrganizerControllerReference();
+        return categoryListCell;
+    }
+
     private void deleteSelectedTaskAndRefresh(Task task) {
         getSelectedCategoryItem().getTasks().remove(task);
         completedTasksListView.getItems().remove(task);
@@ -616,7 +635,7 @@ public class OrganizerController implements Initializable {
 
     private void playReminderJingle() {
         try {
-            playSound(getFile("jingle/alarm.mp3"));
+            playSound(getFile("jingle/alarm.wav"));
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -624,7 +643,7 @@ public class OrganizerController implements Initializable {
 
     private void playDoneJingle() {
         try {
-            playSound(getFile("jingle/done.mp3"));
+            playSound(getFile("jingle/done.wav"));
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -634,12 +653,9 @@ public class OrganizerController implements Initializable {
         return new File(pathname);
     }
 
-    // todo: separate thread for that?
     private void playSound(File soundFile) throws MalformedURLException {
         Media sound = new Media(soundFile.toURI().toURL().toString());
-
         MediaPlayer mediaPlayer = new MediaPlayer(sound);
-
         mediaPlayer.play();
     }
 
@@ -721,23 +737,26 @@ public class OrganizerController implements Initializable {
         refreshTaskDetails(task);
     }
 
-    // todo, wont just refresh work?
     private void refreshCategories() {
+        categoriesListView.refresh();
         categoriesListView.setItems(FXCollections.observableArrayList(categories));
     }
 
     private void refreshTaskList() {
-        // todo: think about simplifying this
         int selectedCategoryIndex = getSelectedCategoryIndex();
-        if (selectedCategoryIndex < 0 || selectedCategoryIndex >= categories.size()) return;
+
+        if (!isCategoryIndexWithinRange(selectedCategoryIndex))
+            return;
 
         TaskList tasks = categories.get(selectedCategoryIndex);
 
         activeTasksListView.setItems(FXCollections.observableArrayList(tasks.getTasks()));
-        updateContentOfCategoryLabel();
-
         completedTasksListView.refresh();
+        updateContentOfCategoryLabel();
+    }
 
+    private boolean isCategoryIndexWithinRange(int selectedCategoryIndex) {
+        return !(selectedCategoryIndex < 0 || selectedCategoryIndex >= categories.size());
     }
 
     private void refreshTaskDetails(Task task) {
