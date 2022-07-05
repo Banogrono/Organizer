@@ -6,8 +6,8 @@
 /* ----------------------------------------------------------------------------------------------- */
 
 * {
-    -fx-primary-color: #83d5fc;
-    -fx-secondary-color: #46b7ff;
+    -fx-primary-color: rgba(131, 183, 241, 0.55);
+    -fx-secondary-color: #9dbfe3;
     -fx-color-1: #de9f1d;
     /*text*/
     -fx-color-2: #131313;
@@ -16,9 +16,9 @@
     /* List, cells and text fields backgrounds*/
     -fx-color-4: #F3F3F3;
     /* selection*/
-    -fx-color-5: #dadada;
+    -fx-color-5: rgba(224, 224, 224, 0.6);
     /* Side panes*/
-    -fx-color-6: rgba(229, 229, 229, 0.95);
+    -fx-color-6: #F3F3F3;
     -fx-color-transparent: rgba(0, 0, 0, 0);
     -fx-focus-color: -fx-secondary-color;
     -fx-font-size: 1.2em;
@@ -56,6 +56,38 @@
     -fx-background-color: -fx-color-transparent;
     -fx-text-fill: -fx-color-2;
     -fx-opacity: 1;
+
+    -fx-border-color: -fx-color-transparent;
+}
+
+#taskCheckBox {
+    -fx-text-fill: -fx-color-2;
+}
+
+#completedLabel {
+    -fx-border-style: solid;
+    -fx-background-color: -fx-color-6;
+    -fx-border-color: -fx-color-2;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-opacity: 0.7;
+}
+
+#taskListLabel {
+    -fx-border-style: solid;
+    -fx-background-color: -fx-color-6;
+    -fx-border-color: -fx-color-2;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-opacity: 0.7;
+}
+
+#activeTasksListView .list-cell:selected {
+    -fx-background-color: -fx-color-5;
+}
+
+#optionsMenuButton {
+
 }
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -71,12 +103,12 @@
 /* ----------------------------------------------------------------------------------------------- */
 
 .list-view .list-cell {
-    -fx-padding: 4px;
-    -fx-border-insets: 2px;
-    -fx-background-insets: 2px;
+    -fx-padding: 2px;
+    -fx-border-insets: 1px;
+    -fx-background-insets: 1px;
 
-    -fx-background-radius: 2px;
-    -fx-border-radius: 2px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
 }
 
 /* Empty cells*/
@@ -86,8 +118,10 @@
 }
 
 .list-view .list-cell:selected {
-    -fx-background-color: -fx-secondary-color;
-    -fx-text-fill: -fx-color-2;
+    -fx-border-style: solid;
+    -fx-border-color: -fx-color-2;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
 }
 
 .list-view .list-cell:filled:hover {
@@ -115,6 +149,12 @@
 
 .check-box {
     -fx-text-fill: -fx-color-2;
+    -fx-prompt-text-fill: -fx-color-2;
+
+}
+
+.check-box .label {
+    -fx-text-fill: -fx-color-2;
 }
 
 .check-box .mark {
@@ -122,8 +162,8 @@
 }
 
 .check-box .box {
-    -fx-background-radius: 8px;
-    -fx-border-radius: 8px;
+    -fx-background-radius: 32px;
+    -fx-border-radius: 32px;
     -fx-border-color: -fx-color-2;
     -fx-background-color: -fx-color-transparent;
 
@@ -135,11 +175,15 @@
 /* ----------------------------------------------------------------------------------------------- */
 
 .text-area {
-    -fx-border-style: none;
+
     -fx-background-color: -fx-color-4;
     -fx-text-fill: -fx-color-2;
-    -fx-background-radius: 3px;
-    -fx-border-radius: 3px;
+    -fx-prompt-text-fill: -fx-color-2;
+
+    -fx-border-style: solid;
+    -fx-border-color: -fx-color-2;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
 }
 
 .text-area .content {
@@ -163,6 +207,12 @@
     -fx-background-color: -fx-color-6;
     -fx-text-fill: -fx-color-2;
     -fx-opacity: 1;
+    -fx-prompt-text-fill: -fx-color-2;
+
+    -fx-border-style: solid;
+    -fx-border-color: -fx-color-2;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
 
 }
 
@@ -180,6 +230,12 @@
 .button {
     -fx-background-color: -fx-color-4;
     -fx-text-fill: -fx-color-2;
+
+    -fx-border-style: solid;
+    -fx-border-color: -fx-color-2;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+
 }
 .button:hover {
     -fx-background-color: -fx-color-5;
@@ -188,6 +244,11 @@
 .menu-button {
     -fx-background-color: -fx-color-4;
     -fx-text-fill: -fx-color-2;
+
+    -fx-border-style: solid;
+    -fx-border-color: -fx-color-2;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
 }
 
 .menu-button:hover {
@@ -198,6 +259,30 @@
 .menu-button .label{
     -fx-background-color: -fx-color-4;
     -fx-text-fill: -fx-color-2;
+    -fx-border-color: transparent;
+}
+
+.menu-button:hover .label {
+    -fx-background-color: -fx-color-5;
+    -fx-text-fill: -fx-color-2;
+}
+
+.toggle-button {
+    -fx-background-color: -fx-color-4;
+    -fx-text-fill: -fx-color-2;
+
+    -fx-border-style: solid;
+    -fx-border-color: -fx-color-2;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+.toggle-button .label {
+    -fx-border-color: transparent;
+}
+
+.toggle-button :hover {
+    -fx-background-color: -fx-color-5;
 }
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -205,10 +290,13 @@
 /* ----------------------------------------------------------------------------------------------- */
 
 .context-menu {
-    -fx-background-color: transparent;
+    -fx-background-color: -fx-color-6;
     -fx-text-fill: -fx-color-2;
-    -fx-border-width: 1px;
-    -fx-border-color: -fx-primary-color;
+
+    -fx-border-style: solid;
+    -fx-border-color: -fx-color-2;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
 }
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -242,11 +330,11 @@
 
 .separator {
     -fx-border-style: none;
-    -fx-background-color: -fx-color-6;
+    -fx-background-color: transparent;
 }
 
 .separator .line{
-    -fx-border-color: -fx-color-5;
+    -fx-border-color: transparent;
 }
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -294,8 +382,15 @@
 
 .date-picker {
     -fx-background-color: transparent;
-    -fx-background-radius: 4px;
+
+    -fx-border-style: solid;
+    -fx-border-color: -fx-color-2;
     -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+.date-picker .text-field {
+    -fx-border-color: transparent;
 }
 
 .date-picker .arrow-button {
@@ -316,6 +411,8 @@ Customize popup content
 -------------------------------------------*/
 .date-picker .cell {
     -fx-background-color: -fx-color-2;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
 }
 
 .date-picker .cell:hover {
@@ -333,7 +430,7 @@ Customize popup content
 }
 
 .date-picker-popup .month-year-pane {
-    -fx-background-color: -fx-color-5;
+    -fx-background-color: -fx-color-6;
 }
 
 .date-picker-popup .month-year-pane .label {
@@ -346,20 +443,19 @@ Customize popup content
 
 
 .date-picker-popup .day-number-cell {
-    -fx-background-color: -fx-color-5;
+    -fx-background-color: -fx-color-6;
     -fx-text-fill: -fx-color-2;
 }
 
 .date-picker-popup > .calendar-grid {
-
-    -fx-background-color: -fx-color-5;
+    -fx-background-color: -fx-color-6;
     -fx-text-fill: -fx-color-2;
 
 }
 
 .date-picker-popup > * > .date-cell {
 
-    -fx-background-color: -fx-color-5;
+    -fx-background-color: -fx-color-6;
 
     -fx-text-fill: -fx-color-2;
 
@@ -371,7 +467,7 @@ Customize popup content
 
     -fx-opacity: 1.0;
 
-    -fx-border-color: -fx-color-5;
+    -fx-border-color: -fx-color-6;
 
     -fx-border-width: 1px;
 

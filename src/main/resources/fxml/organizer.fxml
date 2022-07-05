@@ -7,6 +7,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
@@ -19,7 +20,7 @@
    <children>
       <VBox fx:id="catPane" prefHeight="600.0" prefWidth="602.0" HBox.hgrow="ALWAYS">
          <children>
-            <Label focusTraversable="false" prefHeight="18.0" prefWidth="250.0" text="Categories">
+            <Label fx:id="categoriesLabel" focusTraversable="false" prefHeight="18.0" prefWidth="250.0" text="Categories">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
@@ -43,19 +44,36 @@
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </padding>
             </Separator>
-            <TextField fx:id="addCategoryTextField" maxWidth="1.7976931348623157E308" onKeyReleased="#addCategoryEventHandler" prefHeight="35.0" prefWidth="169.0" promptText="+ Add a category" />
+            <TextField fx:id="addCategoryTextField" maxWidth="1.7976931348623157E308" onKeyReleased="#addCategoryEventHandler" prefHeight="35.0" prefWidth="169.0" promptText="+ Add a category">
+               <VBox.margin>
+                  <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+               </VBox.margin></TextField>
          </children>
       </VBox>
       <VBox prefHeight="600.0" prefWidth="950.0">
          <children>
-            <Label fx:id="taskListLabel" focusTraversable="false" prefHeight="45.0" prefWidth="463.0" text=" " wrapText="true">
+            <HBox alignment="BASELINE_CENTER" maxWidth="1.7976931348623157E308" spacing="10.0">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
-               <font>
-                  <Font name="Century Gothic Bold" size="22.0" />
-               </font>
-            </Label>
+               <children>
+                  <Label fx:id="taskListLabel" focusTraversable="false" text=" " wrapText="true">
+                     <font>
+                        <Font name="Century Gothic Bold" size="22.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="2.0" left="6.0" right="6.0" top="2.0" />
+                     </padding>
+                  </Label>
+                  <Separator maxWidth="1.7976931348623157E308" opacity="0.0" orientation="VERTICAL" HBox.hgrow="ALWAYS" />
+                  <MenuButton fx:id="optionsMenuButton" mnemonicParsing="false" text=". . .">
+                    <items>
+                      <MenuItem mnemonicParsing="false" text="Action 1" />
+                      <MenuItem mnemonicParsing="false" text="Action 2" />
+                    </items>
+                  </MenuButton>
+               </children>
+            </HBox>
             <ListView fx:id="activeTasksListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseReleased="#loadTaskDetailsEventHandler">
                <VBox.margin>
                   <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
@@ -64,13 +82,16 @@
                   <ContextMenu fx:id="taskListContextMenu" />
                </contextMenu>
             </ListView>
-            <Label focusTraversable="false" text="Completed tasks">
+            <Label fx:id="completedLabel" focusTraversable="false" text="Completed">
                <VBox.margin>
-                  <Insets left="4.0" />
+                  <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
                </VBox.margin>
                <font>
                   <Font name="Century Gothic Bold" size="12.0" />
                </font>
+               <padding>
+                  <Insets bottom="2.0" left="6.0" right="6.0" top="2.0" />
+               </padding>
             </Label>
             <ListView fx:id="completedTasksListView" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" onMouseReleased="#loadCompletedTaskDetailsEventHandler" prefHeight="300.0">
                <VBox.margin>

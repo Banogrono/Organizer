@@ -471,25 +471,11 @@ public class OrganizerController implements Initializable {
     }
 
     private void initializeCategoryContextMenu() {
-
-        MenuItem renameCategoryMenuItem = new MenuItem("Rename category");
-        renameCategoryMenuItem.setOnAction(event -> renameCategory());
-
         MenuItem deleteCategoryMenuItem = new MenuItem("Delete category");
         deleteCategoryMenuItem.setOnAction(event -> deleteCategory());
 
-        categoryContextMenu.getItems().add(renameCategoryMenuItem);
         categoryContextMenu.getItems().add(deleteCategoryMenuItem);
 
-    }
-
-
-
-    // todo: make that work as it should
-    private void renameCategory() {
-        if (getSelectedCategoryItem() == null) return;
-        getSelectedCategoryItem().setTaskListTitle("next");
-        refreshCategories();
     }
 
     private void deleteCategory() {
