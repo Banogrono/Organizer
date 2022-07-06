@@ -7,11 +7,9 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.MenuButton?>
-<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -66,12 +64,7 @@
                      </padding>
                   </Label>
                   <Separator maxWidth="1.7976931348623157E308" opacity="0.0" orientation="VERTICAL" HBox.hgrow="ALWAYS" />
-                  <MenuButton fx:id="optionsMenuButton" mnemonicParsing="false" text=". . .">
-                    <items>
-                      <MenuItem mnemonicParsing="false" text="Action 1" />
-                      <MenuItem mnemonicParsing="false" text="Action 2" />
-                    </items>
-                  </MenuButton>
+                  <MenuButton fx:id="settingsMenuButton" mnemonicParsing="false" />
                </children>
             </HBox>
             <ListView fx:id="activeTasksListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseReleased="#loadTaskDetailsEventHandler">
@@ -167,15 +160,6 @@
                   <Insets />
                </opaqueInsets>
             </Separator>
-            <HBox alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="36.0">
-               <children>
-                  <MenuButton fx:id="backgroundMenuButton" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" />
-                  <ToggleButton fx:id="themeToggleButton" mnemonicParsing="false" onAction="#switchThemeEventHandler" />
-               </children>
-               <padding>
-                  <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
-               </padding>
-            </HBox>
          </children>
          <HBox.margin>
             <Insets left="4.0" />

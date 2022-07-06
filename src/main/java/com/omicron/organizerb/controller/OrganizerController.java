@@ -77,16 +77,13 @@ public class OrganizerController implements Initializable {
     public Button markAsDoneButton;
 
     @FXML
-    public MenuButton backgroundMenuButton;
-
-    @FXML
     public MenuButton remindMeMenuButton;
 
     @FXML
     public MenuButton repeatMenuButton;
 
     @FXML
-    public ToggleButton themeToggleButton;
+    public MenuButton settingsMenuButton;
 
 
     // -------------------------> private fields
@@ -105,7 +102,6 @@ public class OrganizerController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
         loadAndRefreshCategories();
-        loadBackgroundsFromDirectory();
         loadApplicationSettings();
         loadIconsForButtons();
         loadAndSelectCategoryOnStartup();
@@ -117,6 +113,7 @@ public class OrganizerController implements Initializable {
         initializeTaskListContextMenu();
         initializeRepeatMenuButton();
         initializeRemindMeMenuButton();
+        initializeSettingsMenuButton();
 
         disableTaskRelatedButtonsAndMenus(true);
 
@@ -124,6 +121,7 @@ public class OrganizerController implements Initializable {
 
         setOnCloseAction();
     }
+
 
     // -------------------------> FXML methods
 
@@ -173,12 +171,6 @@ public class OrganizerController implements Initializable {
     }
 
 
-    @FXML
-    public void switchThemeEventHandler() {
-        switchApplicationTheme();
-    }
-
-
     // -------------------------> internal methods
 
     private void markTaskAsDoneOrActive() {
@@ -209,22 +201,6 @@ public class OrganizerController implements Initializable {
         refreshTaskList();
     }
 
-    private void switchApplicationTheme() {
-        try {
-            if (themeToggleButton.isSelected()) {
-                loadApplicationTheme("/css/organizerLight.css");
-                applicationSettings.setApplicationThemeCSS("/css/organizerLight.css");
-                return;
-            }
-
-            loadApplicationTheme("/css/organizerDark.css");
-            applicationSettings.setApplicationThemeCSS("/css/organizerDark.css");
-
-        } catch (Exception e) {
-            throw new RuntimeException("Application theme could not be switched! " + e);
-        }
-    }
-
     private void checkForRepeatingTasks() {
         ArrayList<Task> tasksToRemove = new ArrayList<>();
 
@@ -249,11 +225,6 @@ public class OrganizerController implements Initializable {
             String theme = Objects.requireNonNull(getClass().getResource(path)).toExternalForm();
             backgroundHBox.getStylesheets().remove(0);
             backgroundHBox.getStylesheets().add(theme);
-
-            if (backgroundHBox.getStylesheets().get(0).contains("Light"))
-                themeToggleButton.setGraphic(getIcon("/icons/light_off.png"));
-            else
-                themeToggleButton.setGraphic(getIcon("/icons/light_on.png"));
         } catch (Exception e) {
             throw new RuntimeException("Application themes could not be loaded! " + e);
         }
@@ -385,7 +356,7 @@ public class OrganizerController implements Initializable {
         setIconForNodes(deleteButton, "/icons/delete.png");
         setIconForNodes(remindMeMenuButton, "/icons/remind.png");
         setIconForNodes(repeatMenuButton, "/icons/repeat.png");
-        setIconForNodes(backgroundMenuButton, "/icons/background.png");
+        setIconForNodes(settingsMenuButton, "/icons/settings.png");
     }
 
     private void setIconForNodes(ButtonBase buttonBase, String pathToIcon) {
@@ -512,6 +483,43 @@ public class OrganizerController implements Initializable {
         repeatMenuButton.getItems().addAll(doNotRepeat, repeatDaily, repeatWeekly, repeatMonthly, repeatYearly);
     }
 
+    private void initializeSettingsMenuButton() {
+
+        CheckMenuItem switchTheme = new CheckMenuItem("Toggle theme");
+        switchTheme.setOnAction(e -> switchApplicationTheme(switchTheme));
+
+        Menu backgroundMenu = loadBackgroundsIntoMenu();
+        settingsMenuButton.getItems().addAll(switchTheme, backgroundMenu);
+
+    }
+
+    private Menu loadBackgroundsIntoMenu() {
+        String pathToBGFolder = "backgrounds/";
+
+        String[] backgrounds = findBackgrounds(pathToBGFolder);
+
+        Menu backgroundMenu = addAvailableBackgroundsToMenu(pathToBGFolder, backgrounds);
+        backgroundMenu.setText("Backgrounds");
+        return backgroundMenu;
+    }
+
+    private void switchApplicationTheme(CheckMenuItem toggleTheme) {
+        try {
+            if (toggleTheme.isSelected()) {
+                loadApplicationTheme("/css/organizerLight.css");
+                applicationSettings.setApplicationThemeCSS("/css/organizerLight.css");
+                return;
+            }
+
+            loadApplicationTheme("/css/organizerDark.css");
+            applicationSettings.setApplicationThemeCSS("/css/organizerDark.css");
+
+        } catch (Exception e) {
+            throw new RuntimeException("Application theme could not be switched! " + e);
+        }
+    }
+
+
     private void setTaskRepetition(Task task, RepeatTask repetition) {
         if (task == null) return;
 
@@ -591,6 +599,7 @@ public class OrganizerController implements Initializable {
         };
     }
 
+    // todo can be generified? eg via interface
     private TaskListCellController getCustomTaskListCellController() {
         TaskListCellController taskListCell = TaskListCellController.newInstance();
 
@@ -650,23 +659,17 @@ public class OrganizerController implements Initializable {
         return file.list();
     }
 
-    private void loadBackgroundsFromDirectory() {
 
-        String pathToBGFolder = "backgrounds/";
+    private Menu addAvailableBackgroundsToMenu(String pathToBGFolder, String[] backgrounds) {
+        Menu backgroundsMenu = new Menu();
 
-        String[] backgrounds = findBackgrounds(pathToBGFolder);
-
-        addAvailableBackgroundsToMenu(pathToBGFolder, backgrounds);
-
-    }
-
-    private void addAvailableBackgroundsToMenu(String pathToBGFolder, String[] backgrounds) {
         for (var image : backgrounds) {
 
             MenuItem item = new MenuItem(image);
             item.setOnAction(event -> setHBoxBackground(pathToBGFolder, image));
-            backgroundMenuButton.getItems().add(item);
+            backgroundsMenu.getItems().add(item);
         }
+        return backgroundsMenu;
     }
 
     private void setHBoxBackground(String pathToBGFolder, String image) {

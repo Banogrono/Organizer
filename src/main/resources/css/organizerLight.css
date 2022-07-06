@@ -32,7 +32,6 @@
 
 #catPane {
     -fx-background-color: -fx-color-6;
-
 }
 
 #detailsPane {
@@ -86,9 +85,33 @@
     -fx-background-color: -fx-color-5;
 }
 
-#optionsMenuButton {
+#settingsMenuButton {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-color-2;
+
+    -fx-border-style: none;
+    -fx-border-color: transparent;
 
 }
+
+#settingsMenuButton .label{
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-color-2;
+    -fx-border-color: transparent;
+    -fx-background-radius: 16px;
+}
+
+#settingsMenuButton:hover .label{
+    -fx-background-color: -fx-color-5;
+    -fx-text-fill: -fx-color-2;
+    -fx-border-color: transparent;
+}
+
+#settingsMenuButton > .arrow-button > .arrow {
+    -fx-background-color: transparent;
+    -fx-text-fill: transparent;
+}
+
 
 /* ----------------------------------------------------------------------------------------------- */
 /*                                          LABELS                                                 */
