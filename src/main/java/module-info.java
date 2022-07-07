@@ -4,6 +4,7 @@ module com.omicron.organizerb {
     requires javafx.media;
     requires static lombok;
     requires java.desktop;
+    requires java.logging;
 
     opens com.omicron.organizerb to javafx.fxml;
     exports com.omicron.organizerb;

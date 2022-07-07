@@ -10,20 +10,17 @@ package com.omicron.organizerb.controller;
 
 import com.omicron.organizerb.model.Task;
 import com.omicron.organizerb.model.TaskPriority;
+import com.omicron.organizerb.model.Utility;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Objects;
 import java.util.ResourceBundle;
 
 
@@ -109,7 +106,7 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
     // -------------------------> Static internal methods
 
     public static TaskListCellController newInstance() {
-        FXMLLoader loader = getFXMLLoader("fxml/taskListCell.fxml");
+        FXMLLoader loader = Utility.getFXMLLoader("fxml/taskListCell.fxml");
         try {
             loader.load();
             return loader.getController();
@@ -118,14 +115,6 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
         }
     }
 
-    private static FXMLLoader getFXMLLoader(String path) {
-        try {
-            URL dialogFXML = new File(path).toURI().toURL();
-            return new FXMLLoader(dialogFXML);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 
 
     // -------------------------> Internal methods
@@ -145,9 +134,9 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
 
         try {
             switch (priority) {
-                case HIGH -> this.priorityLabel.setGraphic(getIcon("/icons/high.png"));
+                case HIGH -> this.priorityLabel.setGraphic(Utility.getIcon("/icons/high.png"));
                 case NORMAL -> this.priorityLabel.setGraphic(null);
-                case LOW -> this.priorityLabel.setGraphic(getIcon("/icons/low.png"));
+                case LOW -> this.priorityLabel.setGraphic(Utility.getIcon("/icons/low.png"));
             }
         } catch (Exception e) {
             throw new RuntimeException("Could not load priority icons. " + e);
@@ -171,13 +160,7 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
         setPriorityPaneColor(task.getPriority());
     }
 
-    private ImageView getIcon(String path) {
-        String imageLocation = Objects.requireNonNull(getClass().getResource(path)).toExternalForm();
-        ImageView img = new ImageView(new Image(imageLocation));
-        img.fitWidthProperty().setValue(24);
-        img.fitHeightProperty().setValue(24);
-        return img;
-    }
+
 
     private void makeItemInvisibleIfEmpty(boolean isEmpty) {
         cellHBox.getChildrenUnmodifiable().forEach(child -> child.setVisible(!isEmpty));

@@ -9,14 +9,12 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
@@ -24,6 +22,8 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class OrganizerController implements Initializable {
 
@@ -92,6 +92,8 @@ public class OrganizerController implements Initializable {
 
     private ApplicationSettings applicationSettings;
 
+    private static final Logger logger = Logger.getLogger(OrganizerController.class.getName());
+
 
     // ========================================================================================
     // Methods
@@ -132,12 +134,12 @@ public class OrganizerController implements Initializable {
 
     @FXML
     public void addTaskEventHandler(KeyEvent event) {
-        addNewTaskToSelectedCategory(event);
+        handleAddingNewTask(event);
     }
 
     @FXML
     public void addCategoryEventHandler(KeyEvent event) {
-        addNewCategory(event);
+        handleAddingNewCategory(event);
     }
 
     @FXML
@@ -226,7 +228,8 @@ public class OrganizerController implements Initializable {
             backgroundHBox.getStylesheets().remove(0);
             backgroundHBox.getStylesheets().add(theme);
         } catch (Exception e) {
-            throw new RuntimeException("Application themes could not be loaded! " + e);
+            logger.log(Level.WARNING, "Application themes could not be loaded! ");
+            e.printStackTrace();
         }
     }
 
@@ -234,7 +237,8 @@ public class OrganizerController implements Initializable {
         try {
             applicationSettings = deserializeApplicationSettings();
         } catch (Exception e) {
-            System.out.println("Settings file not found. " + e);
+            logger.log(Level.WARNING, "Settings file not found. ");
+            e.printStackTrace();
             applicationSettings = new ApplicationSettings();
         }
 
@@ -307,38 +311,43 @@ public class OrganizerController implements Initializable {
             task.setDate(addDueDatePicker.getValue());
     }
 
-    private void addNewTaskToSelectedCategory(KeyEvent event) {
+    private void handleAddingNewTask(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
             if (!(addTaskTextField.getText() == null || addTaskTextField.getText().isBlank())) {
-
-                // create new task
-                Task task = new Task();
-                task.setTitle(addTaskTextField.getText());
-
-                addTaskToTaskList(task);
-                refreshTaskList();
-                clearAddTaskTextFiled();
+                createAndAddNewTaskToSelectedCategory();
             }
         }
     }
 
-    private void addNewCategory(KeyEvent event) {
+    private void createAndAddNewTaskToSelectedCategory() {
+        Task task = new Task();
+        task.setTitle(addTaskTextField.getText());
+
+        addTaskToTaskList(task);
+        refreshTaskList();
+        addTaskTextField.clear();
+    }
+
+    private void handleAddingNewCategory(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
 
             boolean isCategoryNameValid =
                     addCategoryTextField.getText() != null && !addCategoryTextField.getText().isBlank();
 
             if (isCategoryNameValid) {
-
-                TaskList taskList = new TaskList();
-
-                taskList.setTaskListTitle(addCategoryTextField.getText());
-                categories.add(taskList);
-                refreshCategories();
-
-                addCategoryTextField.setText("");
+                createAndAddNewCategory();
             }
         }
+    }
+
+    private void createAndAddNewCategory() {
+        TaskList taskList = new TaskList();
+
+        taskList.setTaskListTitle(addCategoryTextField.getText());
+        categories.add(taskList);
+        refreshCategories();
+
+        addCategoryTextField.setText("");
     }
 
     private void setCustomCellsFactoriesForTaskLists() {
@@ -351,7 +360,6 @@ public class OrganizerController implements Initializable {
     }
 
     private void loadIconsForButtons() {
-
         setIconForNodes(markAsDoneButton, "/icons/done.png");
         setIconForNodes(deleteButton, "/icons/delete.png");
         setIconForNodes(remindMeMenuButton, "/icons/remind.png");
@@ -361,23 +369,14 @@ public class OrganizerController implements Initializable {
 
     private void setIconForNodes(ButtonBase buttonBase, String pathToIcon) {
         try {
-            buttonBase.setGraphic(getIcon(pathToIcon));
+            buttonBase.setGraphic(Utility.getIcon(pathToIcon));
             buttonBase.alignmentProperty().setValue(Pos.BOTTOM_LEFT);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Node icons could not be set. ");
+            e.printStackTrace();
         }
     }
 
-    private ImageView getIcon(String path) throws MalformedURLException {
-        String imageLocation = Objects.requireNonNull(getClass().getResource(path)).toExternalForm();
-
-        ImageView img = new ImageView(new Image(imageLocation));
-        int MAX_ICON_SIZE = 24;
-        img.fitWidthProperty().setValue(MAX_ICON_SIZE);
-        img.fitHeightProperty().setValue(MAX_ICON_SIZE);
-
-        return img;
-    }
 
     private void initializeTaskListContextMenu() {
 
@@ -496,7 +495,7 @@ public class OrganizerController implements Initializable {
     private Menu loadBackgroundsIntoMenu() {
         String pathToBGFolder = "backgrounds/";
 
-        String[] backgrounds = findBackgrounds(pathToBGFolder);
+        String[] backgrounds = Utility.getAllFilesInDirectory(pathToBGFolder);
 
         Menu backgroundMenu = addAvailableBackgroundsToMenu(pathToBGFolder, backgrounds);
         backgroundMenu.setText("Backgrounds");
@@ -515,7 +514,8 @@ public class OrganizerController implements Initializable {
             applicationSettings.setApplicationThemeCSS("/css/organizerDark.css");
 
         } catch (Exception e) {
-            throw new RuntimeException("Application theme could not be switched! " + e);
+            logger.log(Level.SEVERE, "Application theme could not be switched! ");
+            e.printStackTrace();
         }
     }
 
@@ -563,11 +563,11 @@ public class OrganizerController implements Initializable {
         if (task == null) return;
 
         Timer timer = new Timer();
-        TimerTask job = getTimerTask(task);
+        TimerTask job = createTimerTaskForPlayingReminderJingle(task);
 
         if (task.getDate().equals(LocalDate.now())) {
 
-            long differenceInMilliseconds = CompareAndReturnTimeDifferenceInMilliseconds(task);
+            long differenceInMilliseconds = task.getTimeDifferenceInMilliseconds(LocalTime.now());
 
             timer.schedule(job, differenceInMilliseconds);
             return;
@@ -576,24 +576,11 @@ public class OrganizerController implements Initializable {
         timer.schedule(job, Date.from(task.getDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
     }
 
-    private long CompareAndReturnTimeDifferenceInMilliseconds(Task task) {
-        LocalTime now = LocalTime.now();
-        LocalTime taskTime = task.getTime();
-
-        return (taskTime
-                .minusHours(now.getHour())
-                .minusMinutes(now.getMinute())
-                .minusSeconds(now.getSecond())
-                .toSecondOfDay()) * 1000L;
-    }
-
-    private TimerTask getTimerTask(Task task) {
+    private TimerTask createTimerTaskForPlayingReminderJingle(Task task) {
         return new TimerTask() {
             @Override
             public void run() {
-                // play remind jingle
                 playReminderJingle();
-
                 Platform.runLater(() -> ReminderPopupController.display(task));
             }
         };
@@ -617,8 +604,6 @@ public class OrganizerController implements Initializable {
         if (categoryListCell == null)
             throw new RuntimeException("CategoryListCellController object is a null!");
 
-        // set reference of this object in task list controller, so it can access methods of this object
-        categoryListCell.setOrganizerControllerReference();
         return categoryListCell;
     }
 
@@ -630,33 +615,20 @@ public class OrganizerController implements Initializable {
 
     private void playReminderJingle() {
         try {
-            playSound(getFile("jingle/alarm.wav"));
+            Utility.playSound(Utility.getFile("jingle/alarm.wav"));
         } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.SEVERE, "Sound could not be played. ");
+            e.printStackTrace();
         }
     }
 
     private void playDoneJingle() {
         try {
-            playSound(getFile("jingle/done.wav"));
+            Utility.playSound(Utility.getFile("jingle/done.wav"));
         } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.SEVERE, "Sound could not be played. ");
+            e.printStackTrace();
         }
-    }
-
-    private File getFile(String pathname) {
-        return new File(pathname);
-    }
-
-    private void playSound(File soundFile) throws MalformedURLException {
-        Media sound = new Media(soundFile.toURI().toURL().toString());
-        MediaPlayer mediaPlayer = new MediaPlayer(sound);
-        mediaPlayer.play();
-    }
-
-    private String[] findBackgrounds(String path) {
-        File file = getFile(path);
-        return file.list();
     }
 
 
@@ -679,18 +651,26 @@ public class OrganizerController implements Initializable {
 
             Background background = createBackgroundFromImage(new Image(new FileInputStream(pathToBGFolder + image)));
             backgroundHBox.setBackground(background);
+
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            logger.log(Level.WARNING, "Background could not be set. ");
+            e.printStackTrace();
         }
     }
 
     private Background createBackgroundFromImage(Image image) {
-        BackgroundSize size = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, true);
+        BackgroundSize size = new BackgroundSize(
+                BackgroundSize.AUTO,
+                BackgroundSize.AUTO,
+                true,
+                true,
+                true,
+                false);
 
         return new Background(new BackgroundImage(image,
                 BackgroundRepeat.NO_REPEAT,
                 BackgroundRepeat.NO_REPEAT,
-                BackgroundPosition.CENTER,
+                BackgroundPosition.DEFAULT,
                 size));
     }
 
@@ -699,7 +679,8 @@ public class OrganizerController implements Initializable {
             loadDeserializedCategories();
         } catch (Exception e) {
             loadSampleCategories();
-            throw new RuntimeException("Categories could not be loaded! " + e);
+            logger.log(Level.WARNING, "Categories could not be loaded! ");
+            e.printStackTrace();
         } finally {
             refreshCategories();
         }
@@ -795,9 +776,6 @@ public class OrganizerController implements Initializable {
         return activeTask == null ? completedTask : activeTask;
     }
 
-    private void clearAddTaskTextFiled() {
-        addTaskTextField.setText("");
-    }
 
     private void addTaskToTaskList(Task task) {
         getSelectedCategoryItem().addTask(task);
@@ -816,68 +794,37 @@ public class OrganizerController implements Initializable {
     private void serializeCategories() {
         String path = "programData/categories";
         ArrayList<TaskList> categories = new ArrayList<>(categoriesListView.getItems());
-        serializeObject(categories, path);
+        Utility.serializeObject(categories, path);
     }
 
     private void serializeCompletedTasks() {
         String path = "programData/completed";
         ArrayList<Task> completedTasks = new ArrayList<>(completedTasksListView.getItems());
-        serializeObject(completedTasks, path);
+        Utility.serializeObject(completedTasks, path);
     }
 
     private void serializeApplicationSettings() {
         String path = "programData/settings";
-        serializeObject(this.applicationSettings, path);
+        Utility.serializeObject(this.applicationSettings, path);
     }
 
     private ApplicationSettings deserializeApplicationSettings() {
         String path = "programData/settings";
-        return (ApplicationSettings) deserializeObject(path);
+        return (ApplicationSettings) Utility.deserializeObject(path);
     }
 
 
     @SuppressWarnings("unchecked")
     private ArrayList<TaskList> deserializeCategories() {
-        return (ArrayList<TaskList>) deserializeObject("programData/categories");
+        return (ArrayList<TaskList>) Utility.deserializeObject("programData/categories");
     }
 
 
     @SuppressWarnings("unchecked")
     private ArrayList<Task> deserializeCompletedTasks() {
-        return (ArrayList<Task>) deserializeObject("programData/completed");
+        return (ArrayList<Task>) Utility.deserializeObject("programData/completed");
     }
 
-
-    private Object deserializeObject(String objectPath) {
-        try {
-            FileInputStream fileInputStream = new FileInputStream(objectPath);
-            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-
-            Object deserializedObject = objectInputStream.readObject();
-
-            objectInputStream.close();
-            fileInputStream.close();
-
-            return deserializedObject;
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void serializeObject(Object toSerialize, String path) {
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(path);
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
-
-            objectOutputStream.writeObject(toSerialize);
-
-            objectOutputStream.close();
-            fileOutputStream.close();
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     private void onClose() {
         saveDataToDisk();
@@ -920,6 +867,5 @@ public class OrganizerController implements Initializable {
         categories.add(taskList5);
 
     }
-
 
 }

@@ -9,6 +9,7 @@
 package com.omicron.organizerb.controller;
 
 import com.omicron.organizerb.model.TaskList;
+import com.omicron.organizerb.model.Utility;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -16,7 +17,6 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -130,11 +130,8 @@ public class CategoryListCellController extends ListCell<TaskList> implements In
         categoryHBox.getChildrenUnmodifiable().forEach(child -> child.setVisible(!isEmpty));
     }
 
-    public void setOrganizerControllerReference() {
-    }
-
     public static CategoryListCellController newInstance() {
-        FXMLLoader loader = getFXMLLoader();
+        FXMLLoader loader = Utility.getFXMLLoader("fxml/categoryListCell.fxml");
         try {
             loader.load();
             return loader.getController();
@@ -143,12 +140,4 @@ public class CategoryListCellController extends ListCell<TaskList> implements In
         }
     }
 
-    private static FXMLLoader getFXMLLoader() {
-        try {
-            URL dialogFXML = new File("fxml/categoryListCell.fxml").toURI().toURL();
-            return new FXMLLoader(dialogFXML);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

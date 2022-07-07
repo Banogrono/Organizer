@@ -59,25 +59,20 @@
 }
 
 #completedLabel {
-    -fx-border-style: solid;
+
     -fx-background-color: -fx-color-6;
-    -fx-border-color: -fx-color-2;
-    -fx-border-radius: 8px;
     -fx-background-radius: 8px;
     -fx-opacity: 0.7;
 }
 
 #taskListLabel {
-    -fx-border-style: solid;
     -fx-background-color: -fx-color-6;
-    -fx-border-color: -fx-color-2;
-    -fx-border-radius: 8px;
     -fx-background-radius: 8px;
     -fx-opacity: 0.7;
 }
 
 #activeTasksListView .list-cell:selected {
-    -fx-background-color: -fx-color-5;
+    -fx-background-color: -fx-secondary-color;
 }
 
 #settingsMenuButton {
