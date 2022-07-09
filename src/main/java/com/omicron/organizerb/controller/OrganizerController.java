@@ -265,6 +265,7 @@ public class OrganizerController implements Initializable {
         repeatMenuButton.disableProperty().setValue(value);
         markAsDoneButton.disableProperty().setValue(value);
         addDueDatePicker.disableProperty().setValue(value);
+        taskDescriptionTextArea.disableProperty().setValue(value);
     }
 
     private Task loadTaskIfRepeated(Task task) {
@@ -346,6 +347,7 @@ public class OrganizerController implements Initializable {
         taskList.setTaskListTitle(addCategoryTextField.getText());
         categories.add(taskList);
         refreshCategories();
+        refreshMoveTaskMenu();
 
         addCategoryTextField.setText("");
     }
@@ -388,6 +390,11 @@ public class OrganizerController implements Initializable {
         taskListContextMenu.getItems().addAll(markTaskAsDone, moveTask, deleteTask, setTaskPriority);
     }
 
+    // todo think of better way of doing that
+    void refreshMoveTaskMenu() {
+        taskListContextMenu.getItems().set(1, initializeMoveTaskToMenu());
+    }
+
     private Menu initializeTaskPriorityMenu() {
         Menu setTaskPriority = new Menu("Set priority...");
 
@@ -425,9 +432,11 @@ public class OrganizerController implements Initializable {
             moveTaskToDifferentCategory(category, menuItem);
 
             moveTask.getItems().add(menuItem);
+
         }
         return moveTask;
     }
+
 
     private void moveTaskToDifferentCategory(TaskList category, MenuItem menuItem) {
         menuItem.setOnAction(e -> {
@@ -437,6 +446,8 @@ public class OrganizerController implements Initializable {
             getSelectedCategoryItem().getTasks().remove(task);
             category.addTask(task);
             refreshTaskList();
+            disableTaskRelatedButtonsAndMenus(true);
+            refreshMoveTaskMenu();
         });
     }
 
@@ -453,6 +464,7 @@ public class OrganizerController implements Initializable {
 
         categories.remove(getSelectedCategoryItem());
         categoriesListView.getItems().remove(getSelectedCategoryItem());
+        refreshMoveTaskMenu();
     }
 
     private void setPriorityForSelectedTask(TaskPriority priority) {
@@ -604,6 +616,7 @@ public class OrganizerController implements Initializable {
         if (categoryListCell == null)
             throw new RuntimeException("CategoryListCellController object is a null!");
 
+        categoryListCell.setOrganizerControllerReference(this);
         return categoryListCell;
     }
 
@@ -611,6 +624,7 @@ public class OrganizerController implements Initializable {
         getSelectedCategoryItem().getTasks().remove(task);
         completedTasksListView.getItems().remove(task);
         refreshTaskList();
+        disableTaskRelatedButtonsAndMenus(true);
     }
 
     private void playReminderJingle() {
@@ -710,6 +724,7 @@ public class OrganizerController implements Initializable {
     private void refreshCategories() {
         categoriesListView.refresh();
         categoriesListView.setItems(FXCollections.observableArrayList(categories));
+
     }
 
     private void refreshTaskList() {

@@ -41,6 +41,8 @@ public class CategoryListCellController extends ListCell<TaskList> implements In
     // -------------------------> internal fields
     private TaskList category;
 
+    private OrganizerController organizerControllerReference;
+
 
     // ========================================================================================
     // Methods
@@ -65,6 +67,7 @@ public class CategoryListCellController extends ListCell<TaskList> implements In
 
         if (this.category == null) return;
         category.setTaskListTitle(categoryTextField.getText());
+        organizerControllerReference.refreshMoveTaskMenu();
     }
 
     @Override
@@ -138,6 +141,10 @@ public class CategoryListCellController extends ListCell<TaskList> implements In
         } catch (IOException ex) {
             return null;
         }
+    }
+
+    public void setOrganizerControllerReference(OrganizerController reference) {
+        this.organizerControllerReference = reference;
     }
 
 }

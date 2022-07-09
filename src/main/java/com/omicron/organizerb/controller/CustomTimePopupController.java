@@ -135,7 +135,7 @@ public class CustomTimePopupController {
     }
 
     private static void initializeMinutesMenuButton(MenuButton minuteMenuButton) {
-        for (int i = 0; i < 60; i++) {
+        for (int i = 0; i < 60; i+=5) {
             var m = i;
             MenuItem minute = new MenuItem("" + m);
             minute.setOnAction(e -> minuteMenuButton.textProperty().setValue("" + m));
