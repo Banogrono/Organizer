@@ -25,6 +25,9 @@ Everything's a WIP, so expect things to break, but overall it works surprisingly
 
 <img style="height:100px; width: auto;" src="ss/organizer_dark.png">
 
+## Note
+  In order to run, change working directory to <repo_name>\target\classes.
+
 ## Authors
 
 - [@Banogrono](https://github.com/Banogrono)
