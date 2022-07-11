@@ -5,13 +5,16 @@ import com.omicron.organizerb.model.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
+import javafx.stage.Stage;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -543,7 +546,7 @@ public class OrganizerController implements Initializable {
         MenuItem remindMeLaterToday = new MenuItem("Later today");
         MenuItem remindMeTomorrow = new MenuItem("Tomorrow");
         MenuItem remindMeNextWeek = new MenuItem("Next Week");
-        MenuItem remindMeCustomTime = new MenuItem("Custom");
+        MenuItem customTime = new MenuItem("Custom");
 
         BiConsumer<LocalTime, LocalDate> consumer = (LocalTime time, LocalDate date) -> {
             Task task = getSelectedTask();
@@ -561,13 +564,29 @@ public class OrganizerController implements Initializable {
         remindMeNextWeek.setOnAction(e ->
                 consumer.accept(LocalTime.of(0, 0), LocalDate.now().plusDays(7)));
 
-        remindMeCustomTime.setOnAction(e -> Platform.runLater(() -> {
+        customTime.setOnAction(e -> Platform.runLater(() -> {
             Task task = getSelectedTask();
-            CustomTimePopupController.display(task);
-            setReminder(task);
+
+           try {
+               FXMLLoader loader = Utility.getFXMLLoader("fxml/timeAndDatePopup.fxml");
+               Stage popupStage = new Stage();
+
+               loader.setControllerFactory( c -> TimeAndDateController.timeAndDateControllerFactory(popupStage, task));
+
+               Scene scene = new Scene(loader.load());
+               popupStage.setScene(scene);
+
+               popupStage.showAndWait();
+
+           } catch (Exception ex) {
+               throw new RuntimeException(ex);
+           }
+
+
+           // todo setReminder(task);
         }));
 
-        remindMeMenuButton.getItems().addAll(remindMeLaterToday, remindMeTomorrow, remindMeNextWeek, remindMeCustomTime);
+        remindMeMenuButton.getItems().addAll(remindMeLaterToday, remindMeTomorrow, remindMeNextWeek, customTime);
     }
 
     private void setReminder(Task task) {

@@ -27,7 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 // TODO: REFACTOR ALL OF THAT
-// todo: support for cusotm css
+// todo: support for custom css
 public class CustomTimePopupController {
 
     public static void display(Task task)

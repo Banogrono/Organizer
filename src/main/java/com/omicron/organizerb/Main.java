@@ -1,5 +1,6 @@
 package com.omicron.organizerb;
 
+import com.omicron.organizerb.model.Utility;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -35,9 +36,7 @@ public class Main extends Application {
     }
 
     private Scene getMainScene() throws IOException {
-        var sceneFxml = new File("fxml/organizer.fxml").toURI().toURL();
-
-        FXMLLoader fxmlLoader = new FXMLLoader(sceneFxml);
+        FXMLLoader fxmlLoader = Utility.getFXMLLoader("fxml/organizer.fxml");
         return new Scene(fxmlLoader.load(), 1100, 600);
     }
 
