@@ -18,6 +18,7 @@ import javafx.stage.Stage;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
@@ -567,29 +568,35 @@ public class OrganizerController implements Initializable {
         customTime.setOnAction(e -> Platform.runLater(() -> {
             Task task = getSelectedTask();
 
-           try {
-               FXMLLoader loader = Utility.getFXMLLoader("fxml/timeAndDatePopup.fxml");
-               Stage popupStage = new Stage();
+            try {
 
-               loader.setControllerFactory( c -> TimeAndDateController.timeAndDateControllerFactory(popupStage, task));
+                createAndShowCustomTimePopup(task);
 
-               Scene scene = new Scene(loader.load());
-               popupStage.setScene(scene);
-
-               popupStage.showAndWait();
-
-           } catch (Exception ex) {
-               throw new RuntimeException(ex);
-           }
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
 
 
-           // todo setReminder(task);
         }));
 
         remindMeMenuButton.getItems().addAll(remindMeLaterToday, remindMeTomorrow, remindMeNextWeek, customTime);
     }
 
-    private void setReminder(Task task) {
+    private void createAndShowCustomTimePopup(Task task) throws IOException {
+        FXMLLoader loader = Utility.getFXMLLoader("fxml/timeAndDatePopup.fxml");
+        Stage popupStage = new Stage();
+        TimeAndDateController popupController =  new TimeAndDateController(popupStage, task);
+
+        popupController.setOrganizerControllerReference(this);
+
+        loader.setControllerFactory(event -> popupController);
+        Scene scene = new Scene(loader.load());
+        popupStage.setScene(scene);
+
+        popupStage.showAndWait();
+    }
+
+    void setReminder(Task task) {
 
         if (task == null) return;
 
