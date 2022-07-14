@@ -8,6 +8,7 @@
 
 package com.omicron.organizerb.controller;
 
+import com.omicron.organizerb.model.PopupController;
 import com.omicron.organizerb.model.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -25,7 +26,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ResourceBundle;
 
-public class TimeAndDateController implements Initializable {
+public class TimeAndDateController implements Initializable, PopupController {
 
     // ========================================================================================
     // Fields
@@ -54,7 +55,7 @@ public class TimeAndDateController implements Initializable {
     private final Stage popupStage;
     private final Task taskReference;
 
-    private OrganizerController organizerControllerReference;
+    private final OrganizerController organizerControllerReference;
     private double xOffset = 0;
     private double yOffset = 0;
 
@@ -62,17 +63,11 @@ public class TimeAndDateController implements Initializable {
     //   Constructors
     //  ========================================================================================
 
-    public TimeAndDateController(Stage stage, Task task) {
-        try {
-            this.taskReference = task;
-            this.popupStage = stage;
-
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public TimeAndDateController(Stage stage, OrganizerController controller, Task task) {
+        this.taskReference = task;
+        this.popupStage = stage;
+        this.organizerControllerReference = controller;
     }
-
 
     //  ========================================================================================
     //   Methods
@@ -90,15 +85,11 @@ public class TimeAndDateController implements Initializable {
 
     }
 
-
     // -------------------------- Internal methods ---------------------------------------------
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        popupStage.initStyle(StageStyle.UNDECORATED);
-        popupStage.initModality(Modality.APPLICATION_MODAL);
-        popupRoot.getStylesheets().remove(0);
-        popupRoot.getStylesheets().add(organizerControllerReference.backgroundHBox.getStylesheets().get(0));
+        initializeStage();
 
         initializeDatePicker();
         initializeMinutesMenuButton();
@@ -106,9 +97,14 @@ public class TimeAndDateController implements Initializable {
         makeWindowDraggable();
     }
 
-    private void makeWindowDraggable() {
-        System.out.println("makeWindowDraggable");
+    private void initializeStage() {
+        popupStage.initStyle(StageStyle.TRANSPARENT);
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupRoot.getStylesheets().remove(0);
+        popupRoot.getStylesheets().add(organizerControllerReference.backgroundHBox.getStylesheets().get(0));
+    }
 
+    private void makeWindowDraggable() {
         popupRoot.setOnMousePressed(event -> {
             xOffset = event.getSceneX();
             yOffset = event.getSceneY();
@@ -176,7 +172,4 @@ public class TimeAndDateController implements Initializable {
         }
     }
 
-    public void setOrganizerControllerReference(OrganizerController organizerController) {
-        this.organizerControllerReference = organizerController;
-    }
 }

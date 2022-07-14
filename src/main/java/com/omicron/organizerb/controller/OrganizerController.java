@@ -14,6 +14,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.FileInputStream;
@@ -134,6 +135,7 @@ public class OrganizerController implements Initializable {
     @FXML
     public void loadTasksEventHandler() {
         loadTasks();
+
     }
 
     @FXML
@@ -378,7 +380,7 @@ public class OrganizerController implements Initializable {
             buttonBase.setGraphic(Utility.getIcon(pathToIcon));
             buttonBase.alignmentProperty().setValue(Pos.BOTTOM_LEFT);
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Node icons could not be set. ");
+            logger.log(Level.SEVERE, "Node icons could not be set.");
             e.printStackTrace();
         }
     }
@@ -576,7 +578,6 @@ public class OrganizerController implements Initializable {
                 throw new RuntimeException(ex);
             }
 
-
         }));
 
         remindMeMenuButton.getItems().addAll(remindMeLaterToday, remindMeTomorrow, remindMeNextWeek, customTime);
@@ -585,14 +586,24 @@ public class OrganizerController implements Initializable {
     private void createAndShowCustomTimePopup(Task task) throws IOException {
         FXMLLoader loader = Utility.getFXMLLoader("fxml/timeAndDatePopup.fxml");
         Stage popupStage = new Stage();
-        TimeAndDateController popupController =  new TimeAndDateController(popupStage, task);
+        TimeAndDateController popupController = new TimeAndDateController(popupStage, this, task);
 
-        popupController.setOrganizerControllerReference(this);
+        loadAndShowPopup(loader, popupStage, popupController);
+    }
 
+    private void createAndShowReminderPopup(Task task) throws IOException {
+        FXMLLoader loader = Utility.getFXMLLoader("fxml/reminderPopup.fxml");
+        Stage popupStage = new Stage();
+        ReminderPopupController popupController = new ReminderPopupController(popupStage, this, task);
+
+        loadAndShowPopup(loader, popupStage, popupController);
+    }
+
+    private void loadAndShowPopup(FXMLLoader loader, Stage popupStage, PopupController popupController) throws IOException {
         loader.setControllerFactory(event -> popupController);
         Scene scene = new Scene(loader.load());
+        scene.setFill(Color.TRANSPARENT);
         popupStage.setScene(scene);
-
         popupStage.showAndWait();
     }
 
@@ -604,7 +615,6 @@ public class OrganizerController implements Initializable {
         TimerTask job = createTimerTaskForPlayingReminderJingle(task);
 
         if (task.getDate().equals(LocalDate.now())) {
-
             long differenceInMilliseconds = task.getTimeDifferenceInMilliseconds(LocalTime.now());
 
             timer.schedule(job, differenceInMilliseconds);
@@ -615,11 +625,19 @@ public class OrganizerController implements Initializable {
     }
 
     private TimerTask createTimerTaskForPlayingReminderJingle(Task task) {
+
         return new TimerTask() {
             @Override
             public void run() {
-                playReminderJingle();
-                Platform.runLater(() -> ReminderPopupController.display(task));
+                Platform.runLater(() -> {
+                    try {
+                        playReminderJingle();
+                        createAndShowReminderPopup(task);
+                    } catch (IOException e) {
+                        logger.log(Level.SEVERE, "Reminder popup could not be displayed. ");
+                        e.printStackTrace();
+                    }
+                });
             }
         };
     }

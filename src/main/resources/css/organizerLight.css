@@ -14,6 +14,7 @@
     -fx-color-4: #F3F3F3;
     -fx-color-5: rgba(224, 224, 224, 0.74);
     -fx-color-6: #F3F3F3;
+    -fx-color-7: #980a0a;
     -fx-color-transparent: rgba(0, 0, 0, 0);
     -fx-focus-color: -fx-secondary-color;
     -fx-font-size: 1.2em;
@@ -112,6 +113,43 @@
     -fx-background-radius: 8px;
     -fx-border-radius: 8px;
     -fx-border-color: transparent;
+}
+
+
+#outerVBBox {
+    -fx-background-color: -fx-color-6;
+    -fx-border-color: -fx-secondary-color;
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+    -fx-border-width: 2px;
+
+}
+
+#reminderImage {
+    -fx-background-color: transparent;
+}
+
+#innerVBox {
+    -fx-background-color: -fx-color-6;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: transparent;
+}
+
+#exitButton {
+    -fx-background-color: transparent;
+    -fx-font-size: larger;
+    -fx-font-weight: bold;
+    -fx-border-color: transparent;
+}
+
+#exitButton:hover {
+    -fx-text-fill: -fx-color-7;
+}
+
+#reminderLabel {
+    -fx-font-size: larger;
+    -fx-font-weight: bold;
 }
 
 /* ----------------------------------------------------------------------------------------------- */
