@@ -8,23 +8,21 @@
 
 package com.omicron.organizerb.controller;
 
+import com.omicron.organizerb.model.ListCellController;
 import com.omicron.organizerb.model.TaskList;
-import com.omicron.organizerb.model.Utility;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 
 // TODO: REFACTOR - perhaps even generify
 
-public class CategoryListCellController extends ListCell<TaskList> implements Initializable {
+public class CategoryListCellController extends ListCell<TaskList> implements Initializable, ListCellController {
 
 
     // ========================================================================================
@@ -131,16 +129,6 @@ public class CategoryListCellController extends ListCell<TaskList> implements In
 
     private void makeItemInvisibleIfEmpty(boolean isEmpty) {
         categoryHBox.getChildrenUnmodifiable().forEach(child -> child.setVisible(!isEmpty));
-    }
-
-    public static CategoryListCellController newInstance() {
-        FXMLLoader loader = Utility.getFXMLLoader("fxml/categoryListCell.fxml");
-        try {
-            loader.load();
-            return loader.getController();
-        } catch (IOException ex) {
-            return null;
-        }
     }
 
     public void setOrganizerControllerReference(OrganizerController reference) {

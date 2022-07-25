@@ -15,11 +15,10 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
@@ -98,6 +97,15 @@ public class OrganizerController implements Initializable {
     private ApplicationSettings applicationSettings;
 
     private static final Logger logger = Logger.getLogger(OrganizerController.class.getName());
+
+    // todo: think about that
+//    private List<Task> tasksToRemind = new ArrayList<>();
+//
+//    private void checkForTasksRequiringReminding() {
+//        for (var task : tasksToRemind) {
+//          //  if (task.getDate() < LocalDate.now())
+//        }
+//    }
 
 
     // ========================================================================================
@@ -239,6 +247,10 @@ public class OrganizerController implements Initializable {
         }
     }
 
+    private String getCurrentAppStylesheet() {
+        return backgroundHBox.getStylesheets().get(0);
+    }
+
     private void loadApplicationSettings() {
         try {
             applicationSettings = deserializeApplicationSettings();
@@ -358,13 +370,19 @@ public class OrganizerController implements Initializable {
         addCategoryTextField.setText("");
     }
 
+    @SuppressWarnings("unchecked")
     private void setCustomCellsFactoriesForTaskLists() {
-        activeTasksListView.setCellFactory(lv -> getCustomTaskListCellController());
-        completedTasksListView.setCellFactory(lv -> getCustomTaskListCellController());
+        activeTasksListView.setCellFactory(lv ->
+                (ListCell<Task>) getCustomListCellController("fxml/taskListCell.fxml"));
+
+        completedTasksListView.setCellFactory(lv ->
+                (ListCell<Task>) getCustomListCellController("fxml/taskListCell.fxml"));
     }
 
+    @SuppressWarnings("unchecked")
     private void setCustomCellsFactoriesForCategories() {
-        categoriesListView.setCellFactory(lv -> getCustomCategoryListCellController());
+        categoriesListView.setCellFactory(lv ->
+                (ListCell<TaskList>) getCustomListCellController("fxml/categoryListCell.fxml"));
     }
 
     private void loadIconsForButtons() {
@@ -506,8 +524,45 @@ public class OrganizerController implements Initializable {
         switchTheme.setOnAction(e -> switchApplicationTheme(switchTheme));
 
         Menu backgroundMenu = loadBackgroundsIntoMenu();
-        settingsMenuButton.getItems().addAll(switchTheme, backgroundMenu);
 
+        MenuItem addCustomBackground = new MenuItem("Add custom background");
+        addCustomBackground.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Open Resource File");
+            File background = fileChooser.showOpenDialog(Main.mainStageReference);
+
+            if (background == null) {
+                logger.log(Level.WARNING, "File not selected.");
+                return;
+            }
+
+            copyFile(background, System.getProperty("user.dir") + "/backgrounds/");
+
+        });
+
+        settingsMenuButton.getItems().addAll(switchTheme, backgroundMenu, addCustomBackground);
+    }
+
+    private void copyFile(File file, String targetDirectory) {
+
+        FileInputStream fileInputStream;
+        FileOutputStream fileOutputStream;
+        try {
+            fileInputStream = new FileInputStream(file);
+            fileOutputStream = new FileOutputStream(targetDirectory);
+
+            int c;
+            while (( c = fileInputStream.read()) != -1) {
+                fileOutputStream.write(c);
+            }
+
+            fileInputStream.close();
+            fileOutputStream.close();
+
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "File could not be copied. ");
+            e.printStackTrace();
+        }
     }
 
     private Menu loadBackgroundsIntoMenu() {
@@ -586,7 +641,8 @@ public class OrganizerController implements Initializable {
     private void createAndShowCustomTimePopup(Task task) throws IOException {
         FXMLLoader loader = Utility.getFXMLLoader("fxml/timeAndDatePopup.fxml");
         Stage popupStage = new Stage();
-        TimeAndDateController popupController = new TimeAndDateController(popupStage, this, task);
+
+        TimeAndDatePopupController popupController = new TimeAndDatePopupController(popupStage, getCurrentAppStylesheet(),this, task);
 
         loadAndShowPopup(loader, popupStage, popupController);
     }
@@ -594,12 +650,12 @@ public class OrganizerController implements Initializable {
     private void createAndShowReminderPopup(Task task) throws IOException {
         FXMLLoader loader = Utility.getFXMLLoader("fxml/reminderPopup.fxml");
         Stage popupStage = new Stage();
-        ReminderPopupController popupController = new ReminderPopupController(popupStage, this, task);
+        ReminderPopupController popupController = new ReminderPopupController(popupStage, getCurrentAppStylesheet(), task);
 
         loadAndShowPopup(loader, popupStage, popupController);
     }
 
-    private void loadAndShowPopup(FXMLLoader loader, Stage popupStage, PopupController popupController) throws IOException {
+    private void loadAndShowPopup(FXMLLoader loader, Stage popupStage, Popup popupController) throws IOException {
         loader.setControllerFactory(event -> popupController);
         Scene scene = new Scene(loader.load());
         scene.setFill(Color.TRANSPARENT);
@@ -642,27 +698,18 @@ public class OrganizerController implements Initializable {
         };
     }
 
-    // todo can be generified? eg via interface
-    private TaskListCellController getCustomTaskListCellController() {
-        TaskListCellController taskListCell = TaskListCellController.newInstance();
+
+    private ListCellController getCustomListCellController(String fxmlBody) {
+        ListCellController taskListCell = ListCellController.newInstance(fxmlBody);
 
         if (taskListCell == null)
-            throw new RuntimeException("TaskListCellController object is a null!");
+            throw new RuntimeException("ListCellController object is a null!");
 
         // set reference of this object in task list controller, so it can access methods of this object
         taskListCell.setOrganizerControllerReference(this);
         return taskListCell;
     }
 
-    private CategoryListCellController getCustomCategoryListCellController() {
-        CategoryListCellController categoryListCell = CategoryListCellController.newInstance();
-
-        if (categoryListCell == null)
-            throw new RuntimeException("CategoryListCellController object is a null!");
-
-        categoryListCell.setOrganizerControllerReference(this);
-        return categoryListCell;
-    }
 
     private void deleteSelectedTaskAndRefresh(Task task) {
         getSelectedCategoryItem().getTasks().remove(task);

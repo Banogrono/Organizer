@@ -8,25 +8,20 @@
 
 package com.omicron.organizerb.controller;
 
-import com.omicron.organizerb.model.PopupController;
+import com.omicron.organizerb.model.Popup;
 import com.omicron.organizerb.model.Task;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
-import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ResourceBundle;
 
-public class TimeAndDateController implements Initializable, PopupController {
+public class TimeAndDatePopupController extends Popup {
 
     // ========================================================================================
     // Fields
@@ -52,20 +47,19 @@ public class TimeAndDateController implements Initializable, PopupController {
 
     // -------------------------- Private fields ---------------------------------------------
 
-    private final Stage popupStage;
     private final Task taskReference;
-
     private final OrganizerController organizerControllerReference;
-    private double xOffset = 0;
-    private double yOffset = 0;
+
 
     //  ========================================================================================
     //   Constructors
     //  ========================================================================================
 
-    public TimeAndDateController(Stage stage, OrganizerController controller, Task task) {
+    public TimeAndDatePopupController(Stage stage, String stylesheet, OrganizerController controller, Task task) {
+        super(stage);
+        super.setStylesheet(stylesheet);
+
         this.taskReference = task;
-        this.popupStage = stage;
         this.organizerControllerReference = controller;
     }
 
@@ -81,39 +75,20 @@ public class TimeAndDateController implements Initializable, PopupController {
     @FXML
     public void closePopup() {
         System.out.println(datePicker.getValue());
-        popupStage.close();
+         popupStage.close();
 
     }
 
     // -------------------------- Internal methods ---------------------------------------------
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        initializeStage();
+    protected void initializeComponents() {
+        super.setRoot(popupRoot);
 
+        initializeDatePicker();
         initializeDatePicker();
         initializeMinutesMenuButton();
         initializeHourMenuButton();
-        makeWindowDraggable();
-    }
-
-    private void initializeStage() {
-        popupStage.initStyle(StageStyle.TRANSPARENT);
-        popupStage.initModality(Modality.APPLICATION_MODAL);
-        popupRoot.getStylesheets().remove(0);
-        popupRoot.getStylesheets().add(organizerControllerReference.backgroundHBox.getStylesheets().get(0));
-    }
-
-    private void makeWindowDraggable() {
-        popupRoot.setOnMousePressed(event -> {
-            xOffset = event.getSceneX();
-            yOffset = event.getSceneY();
-        });
-
-        popupRoot.setOnMouseDragged(event -> {
-            popupStage.setX(event.getScreenX() - xOffset);
-            popupStage.setY(event.getScreenY() - yOffset);
-        });
     }
 
     private void initializeDatePicker() {
@@ -141,7 +116,6 @@ public class TimeAndDateController implements Initializable, PopupController {
         popupStage.close();
     }
 
-    // todo: think about this, too much redundancy
     private void initializeHourMenuButton() {
 
         int taskHour = taskReference.getTime().getHour();

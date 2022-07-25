@@ -8,18 +8,17 @@
 
 package com.omicron.organizerb.controller;
 
+import com.omicron.organizerb.model.ListCellController;
 import com.omicron.organizerb.model.Task;
 import com.omicron.organizerb.model.TaskPriority;
 import com.omicron.organizerb.model.Utility;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.HBox;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -27,7 +26,7 @@ import java.util.ResourceBundle;
 // TODO: REFACTOR - perhaps even generify
 
 // Stolen and modified from: https://github.com/NF1198/JavaFXCustomListViewExample
-public class TaskListCellController extends ListCell<Task> implements Initializable {
+public class TaskListCellController extends ListCell<Task> implements Initializable, ListCellController {
 
 
     // ========================================================================================
@@ -101,21 +100,6 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
             commitEdit(task);
 
     }
-
-
-    // -------------------------> Static internal methods
-
-    public static TaskListCellController newInstance() {
-        FXMLLoader loader = Utility.getFXMLLoader("fxml/taskListCell.fxml");
-        try {
-            loader.load();
-            return loader.getController();
-        } catch (IOException ex) {
-            return null;
-        }
-    }
-
-
 
     // -------------------------> Internal methods
 
