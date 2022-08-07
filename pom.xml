@@ -28,18 +28,6 @@
             <version>18.0.1</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
 
         <!-- JavaFX: Media https://mvnrepository.com/artifact/org.openjfx/javafx.media -->
         <dependency>
@@ -56,15 +44,6 @@
             <version>1.18.24</version>
             <scope>provided</scope>
         </dependency>
-
-        <!--  Gson: Java to Json conversion -->
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.9.0</version>
-        </dependency>
-
-
 
     </dependencies>
 
@@ -136,5 +115,18 @@
             </plugin>
 
         </plugins>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>backgrounds/</exclude>
+                    <exclude>fxml/</exclude>
+                    <exclude>programData/</exclude>
+                </excludes>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
+
     </build>
 </project>

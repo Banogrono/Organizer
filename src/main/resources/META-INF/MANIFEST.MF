@@ -1,3 +1,7 @@
 Manifest-Version: 1.0
-Main-Class: com.omicron.organizerb.Main
+Main-Class: com.omicron.organizerb.Launcher
+Class-Path: javafx-graphics-18.0.1.jar javafx-controls-18.0.1-linux.jar 
+ javafx-controls-18.0.1.jar javafx-graphics-18.0.1-linux.jar javafx-medi
+ a-18.0.1-linux.jar javafx-base-18.0.1.jar javafx-fxml-18.0.1.jar javafx
+ -base-18.0.1-linux.jar javafx-fxml-18.0.1-linux.jar
 

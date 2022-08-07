@@ -1,0 +1,19 @@
+<component name="ArtifactManager">
+  <artifact name="Organizer:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Organizer_jar</output-path>
+    <root id="root">
+      <element id="archive" name="OrganizerB.jar">
+        <element id="module-output" name="OrganizerB" />
+      </element>
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-graphics:18.0.1" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-controls:linux:18.0.1" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-controls:18.0.1" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-graphics:linux:18.0.1" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-media:linux:18.0.1" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-base:18.0.1" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-fxml:18.0.1" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-base:linux:18.0.1" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-fxml:linux:18.0.1" />
+    </root>
+  </artifact>
+</component>
