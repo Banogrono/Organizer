@@ -135,8 +135,8 @@ public class OrganizerController implements Initializable {
         checkForRepeatingTasks();
 
         setOnCloseAction();
-    }
 
+    }
 
     // -------------------------> FXML methods
 
@@ -264,6 +264,13 @@ public class OrganizerController implements Initializable {
             setHBoxBackground("backgrounds/", applicationSettings.getBackground());
 
         loadApplicationTheme(applicationSettings.getApplicationThemeCSS());
+    }
+
+    private void checkMenuItemOnLightThemeSelected() {
+        if (applicationSettings.getApplicationThemeCSS().toLowerCase().contains("light.css")) {
+            CheckMenuItem check = (CheckMenuItem) settingsMenuButton.getItems().get(0);
+            check.setSelected(true);
+        }
     }
 
     private void loadTaskDetails(Task task) {
@@ -541,6 +548,8 @@ public class OrganizerController implements Initializable {
         });
 
         settingsMenuButton.getItems().addAll(switchTheme, backgroundMenu, addCustomBackground);
+
+        checkMenuItemOnLightThemeSelected();
     }
 
     private void copyFile(File file, String targetDirectory) {
@@ -720,8 +729,9 @@ public class OrganizerController implements Initializable {
 
     private void playReminderJingle() {
         try {
-            Utility.playSound(Utility.getFile("jingle/alarm.wav"));
-        } catch (MalformedURLException e) {
+            // todo causes exception on Linux
+            //Utility.playSound(Utility.getFile("jingle/alarm.wav"));
+        } catch (Exception e) {
             logger.log(Level.SEVERE, "Sound could not be played. ");
             e.printStackTrace();
         }
@@ -729,8 +739,9 @@ public class OrganizerController implements Initializable {
 
     private void playDoneJingle() {
         try {
-            Utility.playSound(Utility.getFile("jingle/done.wav"));
-        } catch (MalformedURLException e) {
+            // todo causes exception on Linux
+            //Utility.playSound(Utility.getFile("jingle/done.wav"));
+        } catch (Exception e) {
             logger.log(Level.SEVERE, "Sound could not be played. ");
             e.printStackTrace();
         }
