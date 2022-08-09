@@ -19,7 +19,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -780,8 +779,8 @@ public class OrganizerController implements Initializable {
                 BackgroundSize.AUTO,
                 true,
                 true,
-                true,
-                false);
+                false,
+                true);
 
         return new Background(new BackgroundImage(image,
                 BackgroundRepeat.NO_REPEAT,
