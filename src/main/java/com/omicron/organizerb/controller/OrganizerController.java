@@ -259,10 +259,26 @@ public class OrganizerController implements Initializable {
             applicationSettings = new ApplicationSettings();
         }
 
-        if (applicationSettings.getBackground() != null)
-            setHBoxBackground("backgrounds/", applicationSettings.getBackground());
+        if (applicationSettings.getBackground() != null) {
+            try {
+                setHBoxBackground("backgrounds/", applicationSettings.getBackground());
+            } catch (FileNotFoundException e) {
+                setRandomBackground();
+            }
+        }
 
         loadApplicationTheme(applicationSettings.getApplicationThemeCSS());
+    }
+
+    private void setRandomBackground() {
+        try {
+            String[] backgrounds = Utility.getAllFilesInDirectory("backgrounds/");
+            int randomIndex = new Random().nextInt(backgrounds.length);
+            setHBoxBackground("backgrounds/", backgrounds[randomIndex]);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Background could not be loaded!");
+            e.printStackTrace();
+        }
     }
 
     private void checkMenuItemOnLightThemeSelected() {
@@ -542,7 +558,8 @@ public class OrganizerController implements Initializable {
                 return;
             }
 
-            copyFile(background, System.getProperty("user.dir") + "/backgrounds/");
+            copyFile(background, System.getProperty("user.dir") + "/backgrounds/" + background.getName());
+
 
         });
 
@@ -553,24 +570,66 @@ public class OrganizerController implements Initializable {
 
     private void copyFile(File file, String targetDirectory) {
 
-        FileInputStream fileInputStream;
-        FileOutputStream fileOutputStream;
-        try {
-            fileInputStream = new FileInputStream(file);
-            fileOutputStream = new FileOutputStream(targetDirectory);
+        Runnable copyItemInBackground = new Runnable() {
+            @Override
+            public void run() {
 
-            int c;
-            while (( c = fileInputStream.read()) != -1) {
-                fileOutputStream.write(c);
+                settingsMenuButton.getItems().get(1).disableProperty().setValue(true);
+
+                FileInputStream fileInputStream;
+                FileOutputStream fileOutputStream;
+                try {
+                    fileInputStream = new FileInputStream(file);
+                    fileOutputStream = new FileOutputStream(targetDirectory);
+
+                    int c;
+                    while ((c = fileInputStream.read()) != -1) {
+                        fileOutputStream.write(c);
+                    }
+
+                    fileInputStream.close();
+                    fileOutputStream.close();
+
+                    refreshBackgroundMenu();
+
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "File could not be copied. ");
+                    e.printStackTrace();
+                } finally {
+                    settingsMenuButton.getItems().get(1).disableProperty().setValue(false);
+                }
             }
+        };
 
-            fileInputStream.close();
-            fileOutputStream.close();
+        new Thread(copyItemInBackground).start();
 
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "File could not be copied. ");
-            e.printStackTrace();
-        }
+
+//        FileInputStream fileInputStream;
+//        FileOutputStream fileOutputStream;
+//        // todo put it into a thead
+//        try {
+//            fileInputStream = new FileInputStream(file);
+//            fileOutputStream = new FileOutputStream(targetDirectory);
+//
+//            int c;
+//            while (( c = fileInputStream.read()) != -1) {
+//                fileOutputStream.write(c);
+//            }
+//
+//            fileInputStream.close();
+//            fileOutputStream.close();
+//
+//            refreshBackgroundMenu();
+//
+//        } catch (Exception e) {
+//            logger.log(Level.SEVERE, "File could not be copied. ");
+//            e.printStackTrace();
+//        }
+    }
+
+    private void refreshBackgroundMenu() {
+
+        settingsMenuButton.getItems().set(1, loadBackgroundsIntoMenu());
     }
 
     private Menu loadBackgroundsIntoMenu() {
@@ -650,7 +709,7 @@ public class OrganizerController implements Initializable {
         FXMLLoader loader = Utility.getFXMLLoader("fxml/timeAndDatePopup.fxml");
         Stage popupStage = new Stage();
 
-        TimeAndDatePopupController popupController = new TimeAndDatePopupController(popupStage, getCurrentAppStylesheet(),this, task);
+        TimeAndDatePopupController popupController = new TimeAndDatePopupController(popupStage, getCurrentAppStylesheet(), this, task);
 
         loadAndShowPopup(loader, popupStage, popupController);
     }
@@ -748,29 +807,36 @@ public class OrganizerController implements Initializable {
 
 
     private Menu addAvailableBackgroundsToMenu(String pathToBGFolder, String[] backgrounds) {
+
+
         Menu backgroundsMenu = new Menu();
 
         for (var image : backgrounds) {
 
             MenuItem item = new MenuItem(image);
-            item.setOnAction(event -> setHBoxBackground(pathToBGFolder, image));
+            item.setOnAction(event -> {
+                try {
+                    setHBoxBackground(pathToBGFolder, image);
+                } catch (FileNotFoundException e) {
+                    logger.log(Level.WARNING, "Background could not be set. ");
+                    e.printStackTrace();
+                }
+            });
             backgroundsMenu.getItems().add(item);
         }
         return backgroundsMenu;
+
     }
 
-    private void setHBoxBackground(String pathToBGFolder, String image) {
-        try {
-            if (applicationSettings != null)
-                applicationSettings.setBackground(image);
+    private void setHBoxBackground(String pathToBGFolder, String image) throws FileNotFoundException {
 
-            Background background = createBackgroundFromImage(new Image(new FileInputStream(pathToBGFolder + image)));
-            backgroundHBox.setBackground(background);
+        if (applicationSettings != null)
+            applicationSettings.setBackground(image);
 
-        } catch (FileNotFoundException e) {
-            logger.log(Level.WARNING, "Background could not be set. ");
-            e.printStackTrace();
-        }
+        Background background = createBackgroundFromImage(new Image(new FileInputStream(pathToBGFolder + image)));
+        backgroundHBox.setBackground(background);
+
+
     }
 
     private Background createBackgroundFromImage(Image image) {
