@@ -8,12 +8,17 @@
 
 package com.omicron.organizerb.controller;
 
+import com.omicron.organizerb.model.CustomDataFormat;
 import com.omicron.organizerb.model.ListCellController;
+import com.omicron.organizerb.model.Task;
 import com.omicron.organizerb.model.TaskList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
+import javafx.scene.input.DataFormat;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 
 import java.net.URL;
@@ -54,7 +59,9 @@ public class CategoryListCellController extends ListCell<TaskList> implements In
         updateSelected(false);
         addListenerToChildItems();
         setGraphic(categoryHBox); // set root graphic node of our custom list cell
+        setDragAndDropBehaviour();
     }
+
 
     @Override
     public void commitEdit(TaskList category) {
@@ -99,6 +106,69 @@ public class CategoryListCellController extends ListCell<TaskList> implements In
     }
 
     // -------------------------> internal methods
+
+    // todo: handle swapping categories
+    // todo: add animations and dragover view
+    private void setDragAndDropBehaviour() {
+
+//        setOnDragDetected(event -> {
+//
+//            ObservableList<TaskList> items = getListView().getItems();
+//
+//            Dragboard dragboard = startDragAndDrop(TransferMode.MOVE);
+//            ClipboardContent content = new ClipboardContent();
+//            content.put(CustomDataFormat.TaskFormat, getItem());
+//            content.put(DataFormat.PLAIN_TEXT, this.getIndex());
+//            dragboard.setContent(content);
+//
+//            event.consume();
+//        } );
+
+        initializeTaskDragOver();
+
+        initializeTaskDragDropped();
+
+
+    }
+
+    private void initializeTaskDragDropped() {
+        setOnDragDropped(dragEvent -> {
+
+            Dragboard db = dragEvent.getDragboard();
+            boolean success = false;
+
+            if (db.hasContent(CustomDataFormat.TaskFormat)) {
+                Task sourceTask = (Task) dragEvent.getDragboard().getContent(CustomDataFormat.TaskFormat);
+                int sourceIndex = (int) dragEvent.getDragboard().getContent(DataFormat.PLAIN_TEXT);
+
+                if (sourceTask.isDone()) {
+                    sourceTask.setDone(false);
+                    this.category.addTask(sourceTask);
+                    organizerControllerReference.completedTasksListView.getItems().remove(sourceIndex);
+                    organizerControllerReference.completedTasksListView.refresh();
+                } else {
+                    this.category.addTask(sourceTask);
+                    organizerControllerReference.removeTask(sourceIndex);
+                }
+
+                success = true;
+            }
+
+            dragEvent.setDropCompleted(success);
+            dragEvent.consume();
+        });
+    }
+
+    private void initializeTaskDragOver() {
+        setOnDragOver(dragEvent -> {
+
+            if (dragEvent.getDragboard().hasContent(CustomDataFormat.TaskFormat)) {
+                dragEvent.acceptTransferModes(TransferMode.MOVE);
+            }
+
+            dragEvent.consume();
+        });
+    }
 
     private void addListenerToChildItems() {
         // add an un-focused listener to each child-item that triggers commitEdit

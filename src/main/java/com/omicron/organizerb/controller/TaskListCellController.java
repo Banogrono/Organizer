@@ -8,15 +8,16 @@
 
 package com.omicron.organizerb.controller;
 
-import com.omicron.organizerb.model.ListCellController;
-import com.omicron.organizerb.model.Task;
-import com.omicron.organizerb.model.TaskPriority;
-import com.omicron.organizerb.model.Utility;
+import com.omicron.organizerb.model.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 
 import java.net.URL;
@@ -44,6 +45,7 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
     private Task task;
     private OrganizerController organizerControllerReference;
 
+
     // ========================================================================================
     // Methods
     // ========================================================================================
@@ -58,8 +60,10 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
         addListenerToChildItems();
         setActionForCheckBox();
         setGraphic(cellHBox); // set root graphic node of our custom list cell
+        setDragAndDropBehaviour();
 
     }
+
 
     @Override
     public void commitEdit(Task newValue) {
@@ -99,7 +103,9 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
         if (task != null)
             commitEdit(task);
 
+
     }
+
 
     // -------------------------> Internal methods
 
@@ -144,7 +150,67 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
         setPriorityPaneColor(task.getPriority());
     }
 
+    private void setDragAndDropBehaviour() {
+        initializeDragDetected();
+        initializeDragOver();
+        initializeDragDropped();
+    }
 
+    private void initializeDragDropped() {
+        setOnDragDropped(dragEvent -> {
+
+            Dragboard db = dragEvent.getDragboard();
+            boolean success = false;
+
+            if (db.hasContent(CustomDataFormat.TaskFormat)) {
+                int sourceIndex = (int) dragEvent.getDragboard().getContent(DataFormat.PLAIN_TEXT);
+                Task sourceTask = (Task) dragEvent.getDragboard().getContent(CustomDataFormat.TaskFormat);
+
+                int targetIndex = this.getIndex();
+                Task targetTask = organizerControllerReference.activeTasksListView.getItems().get(targetIndex);
+
+
+                if (!sourceTask.isDone()) {
+                    organizerControllerReference.setTask(targetIndex, sourceTask);
+                    organizerControllerReference.setTask(sourceIndex, targetTask);
+                } else {
+                    sourceTask.setDone(false);
+                    organizerControllerReference.addTask(sourceTask);
+                    organizerControllerReference.completedTasksListView.getItems().remove(sourceIndex);
+                    organizerControllerReference.completedTasksListView.refresh();
+                }
+
+                success = true;
+            }
+
+            dragEvent.setDropCompleted(success);
+            dragEvent.consume();
+        });
+    }
+
+    private void initializeDragOver() {
+        setOnDragOver(dragEvent -> {
+
+            if (dragEvent.getDragboard().hasContent(CustomDataFormat.TaskFormat)) {
+                dragEvent.acceptTransferModes(TransferMode.MOVE);
+            }
+
+            dragEvent.consume();
+        });
+    }
+
+    private void initializeDragDetected() {
+        setOnDragDetected(event -> {
+
+            Dragboard dragboard = startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent content = new ClipboardContent();
+            content.put(CustomDataFormat.TaskFormat, getItem());
+            content.put(DataFormat.PLAIN_TEXT, this.getIndex());
+            dragboard.setContent(content);
+
+            event.consume();
+        });
+    }
 
     private void makeItemInvisibleIfEmpty(boolean isEmpty) {
         cellHBox.getChildrenUnmodifiable().forEach(child -> child.setVisible(!isEmpty));

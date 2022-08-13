@@ -142,7 +142,6 @@ public class OrganizerController implements Initializable {
     @FXML
     public void loadTasksEventHandler() {
         loadTasks();
-
     }
 
     @FXML
@@ -185,6 +184,23 @@ public class OrganizerController implements Initializable {
         markTaskAsDoneOrActive();
     }
 
+    public void removeTask(int index) {
+        TaskList tasks = categories.get(getSelectedCategoryIndex());
+        tasks.removeTask(index);
+        refreshTaskList();
+    }
+
+    public void setTask(int index, Task task) {
+        TaskList tasks = categories.get(getSelectedCategoryIndex());
+        tasks.getTasks().set(index, task);
+        refreshTaskList();
+    }
+
+    public void addTask(Task task) {
+        TaskList tasks = categories.get(getSelectedCategoryIndex());
+        tasks.addTask(task);
+        refreshTaskList();
+    }
 
     // -------------------------> internal methods
 
@@ -603,28 +619,6 @@ public class OrganizerController implements Initializable {
 
         new Thread(copyItemInBackground).start();
 
-
-//        FileInputStream fileInputStream;
-//        FileOutputStream fileOutputStream;
-//        // todo put it into a thead
-//        try {
-//            fileInputStream = new FileInputStream(file);
-//            fileOutputStream = new FileOutputStream(targetDirectory);
-//
-//            int c;
-//            while (( c = fileInputStream.read()) != -1) {
-//                fileOutputStream.write(c);
-//            }
-//
-//            fileInputStream.close();
-//            fileOutputStream.close();
-//
-//            refreshBackgroundMenu();
-//
-//        } catch (Exception e) {
-//            logger.log(Level.SEVERE, "File could not be copied. ");
-//            e.printStackTrace();
-//        }
     }
 
     private void refreshBackgroundMenu() {
@@ -797,8 +791,25 @@ public class OrganizerController implements Initializable {
 
     private void playDoneJingle() {
         try {
+
             // todo causes exception on Linux
-            //Utility.playSound(Utility.getFile("jingle/done.wav"));
+            // Utility.playSound(Utility.getFile("jingle/done.mp3"));
+
+//            Clip clip = AudioSystem.getClip();
+//            InputStream is = Main.class.getResourceAsStream("jingle/bong.wav");
+//            System.out.println(is == null);
+//            AudioInputStream ais = AudioSystem.getAudioInputStream(is);
+//            clip.open(ais);
+//
+//
+//            clip.addLineListener(event -> {
+//                if(LineEvent.Type.STOP.equals(event.getType())) {
+//                    clip.close();
+//                }
+//            });
+//
+//            clip.start();
+
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Sound could not be played. ");
             e.printStackTrace();
@@ -860,7 +871,7 @@ public class OrganizerController implements Initializable {
             loadDeserializedCategories();
         } catch (Exception e) {
             loadSampleCategories();
-            logger.log(Level.WARNING, "Categories could not be loaded! ");
+            logger.log(Level.SEVERE, "Categories could not be loaded! ");
             e.printStackTrace();
         } finally {
             refreshCategories();
@@ -906,6 +917,17 @@ public class OrganizerController implements Initializable {
         completedTasksListView.refresh();
         updateContentOfCategoryLabel();
     }
+
+//    private void refreshTaskList() {
+//        int selectedCategoryIndex = getSelectedCategoryIndex();
+//
+//        if (!isCategoryIndexWithinRange(selectedCategoryIndex))
+//            return;
+//
+//        activeTasksListView.refresh();
+//        completedTasksListView.refresh();
+//        updateContentOfCategoryLabel();
+//    }
 
     private boolean isCategoryIndexWithinRange(int selectedCategoryIndex) {
         return !(selectedCategoryIndex < 0 || selectedCategoryIndex >= categories.size());
