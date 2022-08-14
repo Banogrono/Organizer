@@ -16,6 +16,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
@@ -107,22 +108,19 @@ public class CategoryListCellController extends ListCell<TaskList> implements In
 
     // -------------------------> internal methods
 
-    // todo: handle swapping categories
     // todo: add animations and dragover view
     private void setDragAndDropBehaviour() {
 
-//        setOnDragDetected(event -> {
-//
-//            ObservableList<TaskList> items = getListView().getItems();
-//
-//            Dragboard dragboard = startDragAndDrop(TransferMode.MOVE);
-//            ClipboardContent content = new ClipboardContent();
-//            content.put(CustomDataFormat.TaskFormat, getItem());
-//            content.put(DataFormat.PLAIN_TEXT, this.getIndex());
-//            dragboard.setContent(content);
-//
-//            event.consume();
-//        } );
+        setOnDragDetected(event -> {
+
+            Dragboard dragboard = startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent content = new ClipboardContent();
+            content.put(CustomDataFormat.CategoryFormat, getItem());
+            content.put(DataFormat.PLAIN_TEXT, this.getIndex());
+            dragboard.setContent(content);
+
+            event.consume();
+        } );
 
         initializeTaskDragOver();
 
@@ -131,6 +129,7 @@ public class CategoryListCellController extends ListCell<TaskList> implements In
 
     }
 
+    // todo refactor this madness
     private void initializeTaskDragDropped() {
         setOnDragDropped(dragEvent -> {
 
@@ -153,6 +152,19 @@ public class CategoryListCellController extends ListCell<TaskList> implements In
 
                 success = true;
             }
+            else if (db.hasContent(CustomDataFormat.CategoryFormat)) {
+                TaskList sourceList = (TaskList) dragEvent.getDragboard().getContent(CustomDataFormat.CategoryFormat);
+                int sourceIndex = (int) dragEvent.getDragboard().getContent(DataFormat.PLAIN_TEXT);
+                int targetIndex = this.getIndex();
+                TaskList targetList = organizerControllerReference.categoriesListView.getItems().get(targetIndex);
+
+                organizerControllerReference.setTaskList(targetIndex, sourceList);
+                organizerControllerReference.setTaskList(sourceIndex, targetList);
+
+                success = true;
+            }
+
+
 
             dragEvent.setDropCompleted(success);
             dragEvent.consume();
@@ -163,6 +175,8 @@ public class CategoryListCellController extends ListCell<TaskList> implements In
         setOnDragOver(dragEvent -> {
 
             if (dragEvent.getDragboard().hasContent(CustomDataFormat.TaskFormat)) {
+                dragEvent.acceptTransferModes(TransferMode.MOVE);
+            } else if (dragEvent.getDragboard().hasContent(CustomDataFormat.CategoryFormat)) {
                 dragEvent.acceptTransferModes(TransferMode.MOVE);
             }
 

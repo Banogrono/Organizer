@@ -167,17 +167,19 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
                 Task sourceTask = (Task) dragEvent.getDragboard().getContent(CustomDataFormat.TaskFormat);
 
                 int targetIndex = this.getIndex();
-                Task targetTask = organizerControllerReference.activeTasksListView.getItems().get(targetIndex);
 
+                var targetList = sourceTask.isDone() ?
+                        organizerControllerReference.activeTasksListView :
+                        organizerControllerReference.completedTasksListView;
 
-                if (!sourceTask.isDone()) {
-                    organizerControllerReference.setTask(targetIndex, sourceTask);
-                    organizerControllerReference.setTask(sourceIndex, targetTask);
+                boolean isTaskBeingAdded = targetIndex > targetList.getItems().size();
+
+                System.out.println(targetList.getItems().size());
+
+                if (isTaskBeingAdded) {
+                    addTaskToListview(sourceIndex, sourceTask);
                 } else {
-                    sourceTask.setDone(false);
-                    organizerControllerReference.addTask(sourceTask);
-                    organizerControllerReference.completedTasksListView.getItems().remove(sourceIndex);
-                    organizerControllerReference.completedTasksListView.refresh();
+                    swapTaskPlacesInListview(sourceIndex, sourceTask, targetIndex);
                 }
 
                 success = true;
@@ -186,6 +188,38 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
             dragEvent.setDropCompleted(success);
             dragEvent.consume();
         });
+    }
+
+    private void swapTaskPlacesInListview(int sourceIndex, Task sourceTask, int targetIndex) {
+        Task targetTask = organizerControllerReference.activeTasksListView.getItems().get(targetIndex);
+
+        if (!sourceTask.isDone()) {
+            organizerControllerReference.setTask(targetIndex, sourceTask);
+            organizerControllerReference.setTask(sourceIndex, targetTask);
+        } else {
+            sourceTask.setDone(false);
+            organizerControllerReference.addTask(sourceTask);
+            organizerControllerReference.completedTasksListView.getItems().remove(sourceIndex);
+            organizerControllerReference.completedTasksListView.refresh();
+        }
+    }
+
+    private void addTaskToListview(int sourceIndex, Task sourceTask) {
+        if (sourceTask.isDone()) {
+            sourceTask.setDone(false);
+            organizerControllerReference.addTask(sourceTask);
+            organizerControllerReference.activeTasksListView.refresh();
+
+            organizerControllerReference.completedTasksListView.getItems().remove(sourceIndex);
+            organizerControllerReference.completedTasksListView.refresh();
+        }
+        else {
+            sourceTask.setDone(true);
+            organizerControllerReference.completedTasksListView.getItems().add(sourceTask);
+            organizerControllerReference.completedTasksListView.refresh();
+
+            organizerControllerReference.removeTask(sourceIndex);
+        }
     }
 
     private void initializeDragOver() {

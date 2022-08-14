@@ -11,8 +11,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
@@ -188,6 +187,11 @@ public class OrganizerController implements Initializable {
         TaskList tasks = categories.get(getSelectedCategoryIndex());
         tasks.removeTask(index);
         refreshTaskList();
+    }
+
+    public void setTaskList(int index, TaskList taskList) {
+        categories.set(index, taskList);
+        refreshCategories();
     }
 
     public void setTask(int index, Task task) {
@@ -795,21 +799,6 @@ public class OrganizerController implements Initializable {
             // todo causes exception on Linux
             // Utility.playSound(Utility.getFile("jingle/done.mp3"));
 
-//            Clip clip = AudioSystem.getClip();
-//            InputStream is = Main.class.getResourceAsStream("jingle/bong.wav");
-//            System.out.println(is == null);
-//            AudioInputStream ais = AudioSystem.getAudioInputStream(is);
-//            clip.open(ais);
-//
-//
-//            clip.addLineListener(event -> {
-//                if(LineEvent.Type.STOP.equals(event.getType())) {
-//                    clip.close();
-//                }
-//            });
-//
-//            clip.start();
-
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Sound could not be played. ");
             e.printStackTrace();
@@ -917,17 +906,6 @@ public class OrganizerController implements Initializable {
         completedTasksListView.refresh();
         updateContentOfCategoryLabel();
     }
-
-//    private void refreshTaskList() {
-//        int selectedCategoryIndex = getSelectedCategoryIndex();
-//
-//        if (!isCategoryIndexWithinRange(selectedCategoryIndex))
-//            return;
-//
-//        activeTasksListView.refresh();
-//        completedTasksListView.refresh();
-//        updateContentOfCategoryLabel();
-//    }
 
     private boolean isCategoryIndexWithinRange(int selectedCategoryIndex) {
         return !(selectedCategoryIndex < 0 || selectedCategoryIndex >= categories.size());
