@@ -11,9 +11,11 @@ package com.omicron.organizerb.controller;
 import com.omicron.organizerb.model.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.Dragboard;
@@ -102,8 +104,6 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
         // so this will commit changes even to unmodified cells providing that task ain't a null
         if (task != null)
             commitEdit(task);
-
-
     }
 
 
@@ -160,32 +160,30 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
         setOnDragDropped(dragEvent -> {
 
             Dragboard db = dragEvent.getDragboard();
-            boolean success = false;
 
-            if (db.hasContent(CustomDataFormat.TaskFormat)) {
-                int sourceIndex = (int) dragEvent.getDragboard().getContent(DataFormat.PLAIN_TEXT);
-                Task sourceTask = (Task) dragEvent.getDragboard().getContent(CustomDataFormat.TaskFormat);
-
-                int targetIndex = this.getIndex();
-
-                var targetList = sourceTask.isDone() ?
-                        organizerControllerReference.activeTasksListView :
-                        organizerControllerReference.completedTasksListView;
-
-                boolean isTaskBeingAdded = targetIndex > targetList.getItems().size();
-
-                System.out.println(targetList.getItems().size());
-
-                if (isTaskBeingAdded) {
-                    addTaskToListview(sourceIndex, sourceTask);
-                } else {
-                    swapTaskPlacesInListview(sourceIndex, sourceTask, targetIndex);
-                }
-
-                success = true;
+            if (!db.hasContent(CustomDataFormat.TaskFormat)) {
+                dragEvent.setDropCompleted(false);
+                dragEvent.consume();
+                return;
             }
 
-            dragEvent.setDropCompleted(success);
+            int sourceIndex = (int) dragEvent.getDragboard().getContent(DataFormat.PLAIN_TEXT);
+            Task sourceTask = (Task) dragEvent.getDragboard().getContent(CustomDataFormat.TaskFormat);
+            int targetIndex = this.getIndex();
+
+            var targetListView = sourceTask.isDone() ?
+                    organizerControllerReference.activeTasksListView :
+                    organizerControllerReference.completedTasksListView;
+
+            boolean isTaskBeingAdded = targetIndex > targetListView.getItems().size();
+
+            if (isTaskBeingAdded) {
+                addTaskToListview(sourceIndex, sourceTask);
+            } else {
+                swapTaskPlacesInListview(sourceIndex, sourceTask, targetIndex);
+            }
+
+            dragEvent.setDropCompleted(true);
             dragEvent.consume();
         });
     }
@@ -212,8 +210,7 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
 
             organizerControllerReference.completedTasksListView.getItems().remove(sourceIndex);
             organizerControllerReference.completedTasksListView.refresh();
-        }
-        else {
+        } else {
             sourceTask.setDone(true);
             organizerControllerReference.completedTasksListView.getItems().add(sourceTask);
             organizerControllerReference.completedTasksListView.refresh();
@@ -228,7 +225,6 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
             if (dragEvent.getDragboard().hasContent(CustomDataFormat.TaskFormat)) {
                 dragEvent.acceptTransferModes(TransferMode.MOVE);
             }
-
             dragEvent.consume();
         });
     }
@@ -241,6 +237,9 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
             content.put(CustomDataFormat.TaskFormat, getItem());
             content.put(DataFormat.PLAIN_TEXT, this.getIndex());
             dragboard.setContent(content);
+
+            WritableImage snapshot = this.snapshot(new SnapshotParameters(), null);
+            dragboard.setDragView(snapshot);
 
             event.consume();
         });

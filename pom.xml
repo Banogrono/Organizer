@@ -116,17 +116,17 @@
 
         </plugins>
 
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <excludes>
-                    <exclude>backgrounds/</exclude>
-                    <exclude>fxml/</exclude>
-                    <exclude>programData/</exclude>
-                </excludes>
-                <filtering>false</filtering>
-            </resource>
-        </resources>
+<!--        <resources>-->
+<!--            <resource>-->
+<!--                <directory>src/main/resources</directory>-->
+<!--                <excludes>-->
+<!--                    <exclude>backgrounds/</exclude>-->
+<!--                    <exclude>fxml/</exclude>-->
+<!--                    <exclude>programData/</exclude>-->
+<!--                </excludes>-->
+<!--                <filtering>false</filtering>-->
+<!--            </resource>-->
+<!--        </resources>-->
 
     </build>
 </project>

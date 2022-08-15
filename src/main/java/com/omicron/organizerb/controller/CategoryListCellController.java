@@ -14,12 +14,11 @@ import com.omicron.organizerb.model.Task;
 import com.omicron.organizerb.model.TaskList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DataFormat;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
+import javafx.scene.image.WritableImage;
+import javafx.scene.input.*;
 import javafx.scene.layout.HBox;
 
 import java.net.URL;
@@ -108,9 +107,14 @@ public class CategoryListCellController extends ListCell<TaskList> implements In
 
     // -------------------------> internal methods
 
-    // todo: add animations and dragover view
-    private void setDragAndDropBehaviour() {
 
+    private void setDragAndDropBehaviour() {
+        initializeOnDragDetected();
+        initializeOnDragOver();
+        initializeOnDragDropped();
+    }
+
+    private void initializeOnDragDetected() {
         setOnDragDetected(event -> {
 
             Dragboard dragboard = startDragAndDrop(TransferMode.MOVE);
@@ -119,59 +123,61 @@ public class CategoryListCellController extends ListCell<TaskList> implements In
             content.put(DataFormat.PLAIN_TEXT, this.getIndex());
             dragboard.setContent(content);
 
+
+            WritableImage snapshot = this.snapshot(new SnapshotParameters(), null);
+            dragboard.setDragView(snapshot);
+
             event.consume();
         } );
-
-        initializeTaskDragOver();
-
-        initializeTaskDragDropped();
-
-
     }
 
-    // todo refactor this madness
-    private void initializeTaskDragDropped() {
+    private void initializeOnDragDropped() {
         setOnDragDropped(dragEvent -> {
 
             Dragboard db = dragEvent.getDragboard();
             boolean success = false;
 
             if (db.hasContent(CustomDataFormat.TaskFormat)) {
-                Task sourceTask = (Task) dragEvent.getDragboard().getContent(CustomDataFormat.TaskFormat);
-                int sourceIndex = (int) dragEvent.getDragboard().getContent(DataFormat.PLAIN_TEXT);
-
-                if (sourceTask.isDone()) {
-                    sourceTask.setDone(false);
-                    this.category.addTask(sourceTask);
-                    organizerControllerReference.completedTasksListView.getItems().remove(sourceIndex);
-                    organizerControllerReference.completedTasksListView.refresh();
-                } else {
-                    this.category.addTask(sourceTask);
-                    organizerControllerReference.removeTask(sourceIndex);
-                }
-
+                taskDropped(dragEvent);
                 success = true;
             }
             else if (db.hasContent(CustomDataFormat.CategoryFormat)) {
-                TaskList sourceList = (TaskList) dragEvent.getDragboard().getContent(CustomDataFormat.CategoryFormat);
-                int sourceIndex = (int) dragEvent.getDragboard().getContent(DataFormat.PLAIN_TEXT);
-                int targetIndex = this.getIndex();
-                TaskList targetList = organizerControllerReference.categoriesListView.getItems().get(targetIndex);
-
-                organizerControllerReference.setTaskList(targetIndex, sourceList);
-                organizerControllerReference.setTaskList(sourceIndex, targetList);
-
+                categoryDropped(dragEvent);
                 success = true;
             }
-
-
 
             dragEvent.setDropCompleted(success);
             dragEvent.consume();
         });
     }
 
-    private void initializeTaskDragOver() {
+    private void categoryDropped(DragEvent dragEvent) {
+        TaskList sourceList = (TaskList) dragEvent.getDragboard().getContent(CustomDataFormat.CategoryFormat);
+        int sourceIndex = (int) dragEvent.getDragboard().getContent(DataFormat.PLAIN_TEXT);
+        int targetIndex = this.getIndex();
+        TaskList targetList = organizerControllerReference.categoriesListView.getItems().get(targetIndex);
+
+        organizerControllerReference.setTaskList(targetIndex, sourceList);
+        organizerControllerReference.setTaskList(sourceIndex, targetList);
+    }
+
+    private void taskDropped(DragEvent dragEvent) {
+        Task sourceTask = (Task) dragEvent.getDragboard().getContent(CustomDataFormat.TaskFormat);
+        int sourceIndex = (int) dragEvent.getDragboard().getContent(DataFormat.PLAIN_TEXT);
+
+        if (sourceTask.isDone()) {
+            sourceTask.setDone(false);
+            this.category.addTask(sourceTask);
+            organizerControllerReference.completedTasksListView.getItems().remove(sourceIndex);
+            organizerControllerReference.completedTasksListView.refresh();
+        } else {
+            this.category.addTask(sourceTask);
+            organizerControllerReference.removeTask(sourceIndex);
+        }
+    }
+
+    // todo: add animations and dragover view
+    private void initializeOnDragOver() {
         setOnDragOver(dragEvent -> {
 
             if (dragEvent.getDragboard().hasContent(CustomDataFormat.TaskFormat)) {
