@@ -8,16 +8,12 @@
 
 package com.omicron.organizerb.model;
 
-import com.omicron.organizerb.Main;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,7 +23,6 @@ import java.util.Objects;
 /**
  *  Utility class containing mostly low-level methods that are used in various places across entire application.
  *  I absolutely hate the idea of 'utility class' with random methods, but I have no idea how to do it better.
- *
  *  On the one hand, having those methods here satisfy the DRY principle and simplifies de-clutters classes.
  *  On the other hand, it breaks Single responsibility principle of the SOLID design pattern.
  */
@@ -95,24 +90,5 @@ public class Utility {
         MediaPlayer mediaPlayer = new MediaPlayer(sound);
         mediaPlayer.play();
     }
-
-    public static synchronized void playSound(final String url) {
-        new Thread(new Runnable() {
-            // The wrapper thread is unnecessary, unless it blocks on the
-            // Clip finishing; see comments.
-            public void run() {
-                try {
-                    Clip clip = AudioSystem.getClip();
-                    AudioInputStream inputStream = AudioSystem.getAudioInputStream(
-                            Main.class.getResourceAsStream(url));
-                    clip.open(inputStream);
-                    clip.start();
-                } catch (Exception e) {
-                    System.err.println(e.getMessage());
-                }
-            }
-        }).start();
-    }
-
 
 }

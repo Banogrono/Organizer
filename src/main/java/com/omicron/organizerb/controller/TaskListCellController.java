@@ -15,6 +15,7 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
@@ -124,9 +125,18 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
 
         try {
             switch (priority) {
-                case HIGH -> this.priorityLabel.setGraphic(Utility.getIcon("/icons/high.png"));
-                case NORMAL -> this.priorityLabel.setGraphic(null);
-                case LOW -> this.priorityLabel.setGraphic(Utility.getIcon("/icons/low.png"));
+                case HIGH : {
+                    this.priorityLabel.setGraphic(Utility.getIcon("/icons/high.png"));
+                    break;
+                }
+                case NORMAL : {
+                    this.priorityLabel.setGraphic(null);
+                    break;
+                }
+                case LOW : {
+                    this.priorityLabel.setGraphic(Utility.getIcon("/icons/low.png"));
+                    break;
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException("Could not load priority icons. " + e);
@@ -171,7 +181,7 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
             Task sourceTask = (Task) dragEvent.getDragboard().getContent(CustomDataFormat.TaskFormat);
             int targetIndex = this.getIndex();
 
-            var targetListView = sourceTask.isDone() ?
+            ListView<Task> targetListView = sourceTask.isDone() ?
                     organizerControllerReference.activeTasksListView :
                     organizerControllerReference.completedTasksListView;
 

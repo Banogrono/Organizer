@@ -75,11 +75,23 @@ public class Task implements Serializable {
         this.repetition = repetition;
 
         switch (repetition) {
-            case DAILY -> this.dayOfRepetition = LocalDate.now().plusDays(1);
-            case WEEKLY -> this.dayOfRepetition = LocalDate.now().plusDays(7);
-            case MONTHLY -> this.dayOfRepetition = LocalDate.now().plusDays(30);
-            case YEARLY -> this.dayOfRepetition = LocalDate.now().plusDays(365);
-            case NONE -> dayOfRepetition = null;
+            case DAILY : {
+                this.dayOfRepetition = LocalDate.now().plusDays(1);
+                break;
+            }
+            case WEEKLY : {
+                this.dayOfRepetition = LocalDate.now().plusDays(7);
+                break;
+            }
+            case MONTHLY : {
+                this.dayOfRepetition = LocalDate.now().plusDays(30);
+                break;
+            }
+            case YEARLY : {
+                this.dayOfRepetition = LocalDate.now().plusDays(365);
+                break;
+            }
+            case NONE : dayOfRepetition = null;
         }
 
     }

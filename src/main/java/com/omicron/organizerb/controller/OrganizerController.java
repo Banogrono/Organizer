@@ -11,7 +11,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.input.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
@@ -374,7 +375,7 @@ public class OrganizerController implements Initializable {
 
     private void handleAddingNewTask(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
-            if (!(addTaskTextField.getText() == null || addTaskTextField.getText().isBlank())) {
+            if (!(addTaskTextField.getText() == null || addTaskTextField.getText().isEmpty())) {
                 createAndAddNewTaskToSelectedCategory();
             }
         }
@@ -393,7 +394,7 @@ public class OrganizerController implements Initializable {
         if (event.getCode() == KeyCode.ENTER) {
 
             boolean isCategoryNameValid =
-                    addCategoryTextField.getText() != null && !addCategoryTextField.getText().isBlank();
+                    addCategoryTextField.getText() != null && !addCategoryTextField.getText().isEmpty();
 
             if (isCategoryNameValid) {
                 createAndAddNewCategory();
@@ -590,34 +591,31 @@ public class OrganizerController implements Initializable {
 
     private void copyFile(File file, String targetDirectory) {
 
-        Runnable copyItemInBackground = new Runnable() {
-            @Override
-            public void run() {
+        Runnable copyItemInBackground = () -> {
 
-                settingsMenuButton.getItems().get(1).disableProperty().setValue(true);
+            settingsMenuButton.getItems().get(1).disableProperty().setValue(true);
 
-                FileInputStream fileInputStream;
-                FileOutputStream fileOutputStream;
-                try {
-                    fileInputStream = new FileInputStream(file);
-                    fileOutputStream = new FileOutputStream(targetDirectory);
+            FileInputStream fileInputStream;
+            FileOutputStream fileOutputStream;
+            try {
+                fileInputStream = new FileInputStream(file);
+                fileOutputStream = new FileOutputStream(targetDirectory);
 
-                    int c;
-                    while ((c = fileInputStream.read()) != -1) {
-                        fileOutputStream.write(c);
-                    }
-
-                    fileInputStream.close();
-                    fileOutputStream.close();
-
-                    refreshBackgroundMenu();
-
-                } catch (Exception e) {
-                    logger.log(Level.SEVERE, "File could not be copied. ");
-                    e.printStackTrace();
-                } finally {
-                    settingsMenuButton.getItems().get(1).disableProperty().setValue(false);
+                int c;
+                while ((c = fileInputStream.read()) != -1) {
+                    fileOutputStream.write(c);
                 }
+
+                fileInputStream.close();
+                fileOutputStream.close();
+
+                refreshBackgroundMenu();
+
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "File could not be copied. ");
+                e.printStackTrace();
+            } finally {
+                settingsMenuButton.getItems().get(1).disableProperty().setValue(false);
             }
         };
 
@@ -785,8 +783,12 @@ public class OrganizerController implements Initializable {
 
     private void playReminderJingle() {
         try {
-            // todo causes exception on Linux
-            //Utility.playSound(Utility.getFile("jingle/alarm.wav"));
+            String os = System.getProperty("os.name");
+            if (os.equals("Linux")) {
+                return;
+            }
+
+            Utility.playSound(Utility.getFile("jingle/alarm.wav"));
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Sound could not be played. ");
             e.printStackTrace();
@@ -795,10 +797,13 @@ public class OrganizerController implements Initializable {
 
     private void playDoneJingle() {
         try {
+            // wont do
+            String os = System.getProperty("os.name");
+            if (os.equals("Linux")) {
+                return;
+            }
 
-            // todo causes exception on Linux
-            // Utility.playSound(Utility.getFile("jingle/done.mp3"));
-
+            Utility.playSound(Utility.getFile("jingle/done.mp3"));
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Sound could not be played. ");
             e.printStackTrace();
@@ -807,8 +812,6 @@ public class OrganizerController implements Initializable {
 
 
     private Menu addAvailableBackgroundsToMenu(String pathToBGFolder, String[] backgrounds) {
-
-
         Menu backgroundsMenu = new Menu();
 
         for (var image : backgrounds) {
@@ -880,7 +883,7 @@ public class OrganizerController implements Initializable {
     private void updateTaskDescription(Task task) {
         String content = taskDescriptionTextArea.getText();
 
-        if (content == null || content.isBlank() || task == null) return;
+        if (content == null || content.isEmpty() || task == null) return;
 
         taskDescriptionTextArea.setText(task.getDescription());
 
