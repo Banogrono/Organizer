@@ -584,7 +584,21 @@ public class OrganizerController implements Initializable {
 
         });
 
-        settingsMenuButton.getItems().addAll(switchTheme, backgroundMenu, addCustomBackground);
+        MenuItem switchToKanban = new MenuItem("Kanban Mode");
+        switchToKanban.setOnAction(e -> {
+            try {
+
+
+                FXMLLoader fxmlLoader = Utility.getFXMLLoader("fxml/kanban.fxml");
+                var kanbanScene = new Scene(fxmlLoader.load(), 1100, 600);
+
+                Main.mainStageReference.setScene(kanbanScene);
+            } catch (Exception exc) {
+                //
+            }
+        });
+
+        settingsMenuButton.getItems().addAll(switchTheme, backgroundMenu, addCustomBackground, switchToKanban);
 
         checkMenuItemOnLightThemeSelected();
     }
