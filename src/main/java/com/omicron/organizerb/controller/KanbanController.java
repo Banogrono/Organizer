@@ -1,7 +1,6 @@
 package com.omicron.organizerb.controller;
 
 import com.omicron.organizerb.model.Task;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -59,26 +58,9 @@ public class KanbanController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        setCustomCellsFactoriesForTaskLists();
+        createAndLoadSampleData();
 
-       createAndLoadSampleData();
-
-        ongoingList.setOnMouseClicked(e -> {
-
-            System.out.println(getSelectedList());
-            System.out.println(getSelectedTask());
-        });
-
-        doneList.setOnMouseClicked(e -> {
-
-            System.out.println(getSelectedList());
-            System.out.println(getSelectedTask());
-        });
-
-        todoList.setOnMouseClicked(e -> {
-
-            System.out.println(getSelectedList());
-            System.out.println(getSelectedTask());
-        });
 
     }
 
@@ -89,6 +71,28 @@ public class KanbanController implements Initializable {
     }
 
     // -----------------------------------------------------------------------------
+
+    private void setCustomCellsFactoriesForTaskLists() {
+        todoList.setCellFactory(lv ->
+                getCustomKanbanCell());
+
+        ongoingList.setCellFactory(lv ->
+                getCustomKanbanCell());
+
+        doneList.setCellFactory(lv ->
+                getCustomKanbanCell());
+    }
+
+    private KanbanListCellController getCustomKanbanCell() {
+        KanbanListCellController kanbanCell = KanbanListCellController.newInstance();
+
+        if (kanbanCell == null)
+            throw new RuntimeException("ListCellController object is a null!");
+
+        // set reference of this object in task list controller, so it can access methods of this object
+        kanbanCell.setControllerReference(this);
+        return kanbanCell;
+    }
 
     private void addTask(Task task, ListView<Task> listView) {
         listView.getItems().add(task);
@@ -104,15 +108,6 @@ public class KanbanController implements Initializable {
         if (ongoingList.isFocused()) return ongoingList;
         return doneList;
     }
-
-    // todo: think about that
-    private void clearSelection() {
-        todoList.getSelectionModel().clearSelection();
-        ongoingList.getSelectionModel().clearSelection();
-        doneList.getSelectionModel().clearSelection();
-    }
-
-
 
 
     private void handleAddingNewTask(KeyEvent event) {
