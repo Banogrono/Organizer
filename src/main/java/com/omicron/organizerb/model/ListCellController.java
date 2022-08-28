@@ -17,6 +17,6 @@ public interface ListCellController {
         }
     }
 
-    void setOrganizerControllerReference(OrganizerController controller);
+    void setControllerReference(Controller controller);
 
 }

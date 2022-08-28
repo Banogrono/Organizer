@@ -6,7 +6,6 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.MenuButton?>
-<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
@@ -88,7 +87,7 @@
                <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
             </VBox.margin>
          </Label>
-         <TextArea fx:id="taskDescriptionTextArea" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" promptText="Task description">
+         <TextArea fx:id="taskDescriptionTextArea" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseExited="#updateTaskDescriptionEventHandler" promptText="Task description">
             <VBox.margin>
                <Insets bottom="4.0" left="4.0" right="4.0" top="2.0" />
             </VBox.margin>
@@ -99,19 +98,11 @@
             </VBox.margin>
          </DatePicker>
          <MenuButton fx:id="remindMenuButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Remind me" VBox.vgrow="ALWAYS">
-            <items>
-               <MenuItem mnemonicParsing="false" text="Action 1" />
-               <MenuItem mnemonicParsing="false" text="Action 2" />
-            </items>
             <VBox.margin>
                <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
             </VBox.margin>
          </MenuButton>
          <MenuButton fx:id="repeatMenuButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Repeat" VBox.vgrow="ALWAYS">
-            <items>
-               <MenuItem mnemonicParsing="false" text="Action 1" />
-               <MenuItem mnemonicParsing="false" text="Action 2" />
-            </items>
             <VBox.margin>
                <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
             </VBox.margin>
@@ -121,22 +112,18 @@
                <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
             </VBox.margin>
          </Separator>
-         <Button fx:id="doneButton" alignment="TOP_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Mark as Done" VBox.vgrow="ALWAYS">
+         <Button fx:id="doneButton" alignment="TOP_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseDragReleased="#markTaskAsDoneOrActiveEventHandler" text="Mark as Done" VBox.vgrow="ALWAYS">
             <VBox.margin>
                <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
             </VBox.margin>
          </Button>
-         <Button fx:id="deleteButton" alignment="TOP_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Delete" VBox.vgrow="ALWAYS">
+         <Button fx:id="deleteButton" alignment="TOP_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseDragReleased="#deleteTaskEventHandler" text="Delete" VBox.vgrow="ALWAYS">
             <VBox.margin>
                <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
             </VBox.margin>
          </Button>
          <Separator maxHeight="1.7976931348623157E308" VBox.vgrow="ALWAYS" />
          <MenuButton fx:id="settingsMenuButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Settings" VBox.vgrow="ALWAYS">
-            <items>
-               <MenuItem mnemonicParsing="false" text="Action 1" />
-               <MenuItem mnemonicParsing="false" text="Action 2" />
-            </items>
             <VBox.margin>
                <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
             </VBox.margin>

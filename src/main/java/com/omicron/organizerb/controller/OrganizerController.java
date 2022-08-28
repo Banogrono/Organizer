@@ -28,7 +28,7 @@ import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class OrganizerController implements Initializable {
+public class OrganizerController implements Initializable, Controller {
 
 
     // ========================================================================================
@@ -138,6 +138,8 @@ public class OrganizerController implements Initializable {
     }
 
     // -------------------------> FXML methods
+
+
 
     @FXML
     public void loadTasksEventHandler() {
@@ -783,7 +785,7 @@ public class OrganizerController implements Initializable {
             throw new RuntimeException("ListCellController object is a null!");
 
         // set reference of this object in task list controller, so it can access methods of this object
-        taskListCell.setOrganizerControllerReference(this);
+        taskListCell.setControllerReference(this);
         return taskListCell;
     }
 

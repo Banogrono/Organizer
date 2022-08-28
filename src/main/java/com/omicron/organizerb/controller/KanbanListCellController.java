@@ -1,19 +1,25 @@
 package com.omicron.organizerb.controller;
 
+import com.omicron.organizerb.model.Controller;
+import com.omicron.organizerb.model.CustomDataFormat;
+import com.omicron.organizerb.model.ListCellController;
 import com.omicron.organizerb.model.Task;
-import com.omicron.organizerb.model.Utility;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.image.WritableImage;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class KanbanListCellController extends ListCell<Task> implements Initializable {
+public class KanbanListCellController extends ListCell<Task> implements Initializable, ListCellController {
 
 
     // ========================================================================================
@@ -46,7 +52,8 @@ public class KanbanListCellController extends ListCell<Task> implements Initiali
         updateSelected(false);
         addListenerToChildItems();
         setDragAndDropBehaviour();
-        taskTitle.setText("dupa");
+
+
     }
 
     @Override
@@ -69,7 +76,9 @@ public class KanbanListCellController extends ListCell<Task> implements Initiali
             return;
 
         this.task = task;
-        taskTitle.setText(task.getTitle());
+        //taskTitle.setText(this.task.getTitle());
+        super.setText(this.task.getTitle());
+
     }
 
     @Override
@@ -93,19 +102,6 @@ public class KanbanListCellController extends ListCell<Task> implements Initiali
     // Public Methods
     // -----------------------------------------------------------
 
-    public void setControllerReference(KanbanController reference) {
-        this.controllerReference = reference;
-    }
-
-    static KanbanListCellController newInstance() {
-        FXMLLoader loader = Utility.getFXMLLoader("fxml/kanbanCell.fxml");
-        try {
-            loader.load();
-            return loader.getController();
-        } catch (IOException ex) {
-            return null;
-        }
-    }
 
     // Internal Methods
     // -----------------------------------------------------------
@@ -139,14 +135,67 @@ public class KanbanListCellController extends ListCell<Task> implements Initiali
         initializeDragDropped();
     }
     private void initializeDragDetected() {
+        setOnDragDetected(event -> {
 
+            Dragboard dragboard = startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent content = new ClipboardContent();
+            content.put(CustomDataFormat.TaskFormat, getItem());
+            content.put(DataFormat.PLAIN_TEXT, this.getIndex());
+
+            if (content.get(CustomDataFormat.TaskFormat) == null)
+                return;
+
+            dragboard.setContent(content);
+
+            WritableImage snapshot = this.snapshot(new SnapshotParameters(), null);
+            dragboard.setDragView(snapshot);
+
+            event.consume();
+        });
     }
     private void initializeDragOver() {
+        setOnDragOver(dragEvent -> {
 
+            if (dragEvent.getDragboard().hasContent(CustomDataFormat.TaskFormat)) {
+                dragEvent.acceptTransferModes(TransferMode.MOVE);
+            }
+            dragEvent.consume();
+        });
     }
+
+
+    // todo fix odd task appearing in listview
     private void initializeDragDropped() {
+        setOnDragDropped(dragEvent -> {
+
+            Dragboard db = dragEvent.getDragboard();
+
+            if (!db.hasContent(CustomDataFormat.TaskFormat)) {
+                dragEvent.setDropCompleted(false);
+                dragEvent.consume();
+                return;
+            }
+
+            if (controllerReference.targetListView == null)
+                return;
+
+            Task sourceTask = (Task) dragEvent.getDragboard().getContent(CustomDataFormat.TaskFormat);
+
+            if (controllerReference.getSelectedList().getItems().size() == 1)
+                controllerReference.getSelectedList().getItems().add(new Task());
+
+            controllerReference.getSelectedList().getItems().remove(sourceTask);
+            controllerReference.getSelectedList().refresh();
+            controllerReference.targetListView.getItems().add(sourceTask);
+
+            dragEvent.setDropCompleted(true);
+            dragEvent.consume();
+        });
     }
 
 
-
+    @Override
+    public void setControllerReference(Controller reference) {
+        this.controllerReference = (KanbanController) reference;
+    }
 }

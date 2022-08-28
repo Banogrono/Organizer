@@ -117,7 +117,6 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
                 task.setDone(true);
                 organizerControllerReference.markTaskAsDoneOrActiveEventHandler();
             }
-
         });
     }
 
@@ -246,6 +245,10 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
             ClipboardContent content = new ClipboardContent();
             content.put(CustomDataFormat.TaskFormat, getItem());
             content.put(DataFormat.PLAIN_TEXT, this.getIndex());
+
+            if (content.get(CustomDataFormat.TaskFormat) == null)
+                return;
+
             dragboard.setContent(content);
 
             WritableImage snapshot = this.snapshot(new SnapshotParameters(), null);
@@ -271,8 +274,8 @@ public class TaskListCellController extends ListCell<Task> implements Initializa
         });
     }
 
-    public void setOrganizerControllerReference(OrganizerController reference) {
-        this.organizerControllerReference = reference;
+    public void setControllerReference(Controller reference) {
+        this.organizerControllerReference = (OrganizerController) reference;
     }
 
 }

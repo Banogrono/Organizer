@@ -8,10 +8,7 @@
 
 package com.omicron.organizerb.controller;
 
-import com.omicron.organizerb.model.CustomDataFormat;
-import com.omicron.organizerb.model.ListCellController;
-import com.omicron.organizerb.model.Task;
-import com.omicron.organizerb.model.TaskList;
+import com.omicron.organizerb.model.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.SnapshotParameters;
@@ -221,8 +218,8 @@ public class CategoryListCellController extends ListCell<TaskList> implements In
         categoryHBox.getChildrenUnmodifiable().forEach(child -> child.setVisible(!isEmpty));
     }
 
-    public void setOrganizerControllerReference(OrganizerController reference) {
-        this.organizerControllerReference = reference;
+    public void setControllerReference(Controller reference) {
+        this.organizerControllerReference = (OrganizerController) reference;
     }
 
 }
