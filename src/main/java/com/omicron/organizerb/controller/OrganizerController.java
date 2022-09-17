@@ -591,10 +591,15 @@ public class OrganizerController implements Initializable, Controller {
             try {
 
 
-                FXMLLoader fxmlLoader = Utility.getFXMLLoader("fxml/kanban.fxml");
-                var kanbanScene = new Scene(fxmlLoader.load(), 1100, 600);
+//                FXMLLoader fxmlLoader = Utility.getFXMLLoader("fxml/kanban.fxml");
+//                var kanbanScene = new Scene(fxmlLoader.load(), 1100, 600);
+//
+//                Main.mainStageReference.setScene(kanbanScene);
 
-                Main.mainStageReference.setScene(kanbanScene);
+                FXMLLoader fxmlLoader = Utility.getFXMLLoader("fxml/dragboard.fxml");
+                var dragboard = new Scene(fxmlLoader.load(), 1100, 600);
+
+                Main.mainStageReference.setScene(dragboard);
             } catch (Exception exc) {
                 //
             }
