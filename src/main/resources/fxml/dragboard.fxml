@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="594.0" prefWidth="975.0" style="-fx-background-color: #e8e8e8;" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.omicron.organizerb.controller.DragboardController">
+   <children>
+      <Pane fx:id="backPane" HBox.hgrow="ALWAYS">
+         <children>
+            <Canvas fx:id="backPane" height="200.0" width="200.0" />
+         </children>
+      </Pane>
+      <VBox prefHeight="533.0" prefWidth="266.0" style="-fx-background-color: #f9f9f9; -fx-border-radius: 0 10px 10px 0; -fx-background-radius: 0 10px 10px 0;">
+         <HBox.margin>
+            <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+         </HBox.margin>
+         <TextField fx:id="addTask" promptText="Add new node">
+            <VBox.margin>
+               <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+            </VBox.margin>
+         </TextField>
+         <Button fx:id="draw" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="draw">
+            <VBox.margin>
+               <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+            </VBox.margin>
+         </Button>
+         <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="clean">
+            <VBox.margin>
+               <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+            </VBox.margin>
+         </Button>
+         <padding>
+            <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+         </padding>
+      </VBox>
+   </children>
+</HBox>
